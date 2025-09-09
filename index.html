@@ -56,6 +56,23 @@
             margin-top: 0px; 
         }
 
+        .category-heading {
+            font-family: 'Lato', Arial, sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: #333;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 5px;
+            margin-top: 25px; 
+            margin-left: 20px; 
+        }
+
+        .highlight {
+            background-color: #fff9e6; 
+            border-radius: 8px; 
+            padding: 10px 5px; 
+            border: 1px solid #f0e6c3; 
+        }
 
         .paper-title a {
             color: #0077b6;
@@ -113,60 +130,113 @@
                     <div class="content">
                         <h2>About</h2>
                         <p>
-                            I am currently a PhD student at <a href="https://www.ism.ac.jp/index_e.html">The Institute of Statistical Mathematics</a>, and <a href="https://www.soken.ac.jp/en/">The Graduate University for Advanced Studies, SOKENDAI</a>, supervised by <a href="https://hermite.jp/">Prof. Han Bao</a>.
+                            I am currently a PhD student at <a href="https://www.ism.ac.jp/index_e.html">The Institute of Statistical Mathematics</a>, and <a href="https://www.soken.ac.jp/en/">The Graduate University for Advanced Studies, SOKENDAI</a>, supervised by <a href="https://hermite.jp/">Prof. Han Bao</a>, as well as a visiting student at <a href="https://www.westlake.edu.cn/">Westlake University</a>.
                         </p>    
                         <p>   
                             Previously, I received my M.Eng. in Computer Technology at <a href="http://english.siat.cas.cn/">Shenzhen Institutes of Advanced Technology</a> and <a href="https://english.ucas.ac.cn/">University of Chinese Academy of Sciences</a>, where I worked on the research topic of signal processing and localization under the supervision of <a href="https://scholar.google.com/citations?user=nLsqCz4AAAAJ&hl=en">Prof. Sheng Xu</a>. Before that, I received my B.Sc. in Physics at <a href="https://www.sysu.edu.cn/sysuen/">Sun Yat-sen University</a>.
                         </p>
                         <p>
-                            Research interests: Deep Learning Theory, Optimization.
+                            Research interests: Deep Learning Theory, Optimizer.
                         </p>
                     </div>
 
                     <div class="content">
-                        <h2>Selected Publications</h2>
+                        <h2>Research</h2>
                         <p style="font-size: 14px;">*: equal contribution; &dagger; corresponding author(s)</p>
 
+                        <h3 class="category-heading">Optimizer</h3>
                         <ul>
-                        <div class="publication">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <td style="width: 70%; vertical-align: middle;">
-                                            <li>
-                                            <h3 class="paper-title">On the Performance Analysis of Momentum Method: A Frequency Domain Perspective</h3>
-                                            <p><b>Xianliang Li</b><sup>*</sup>, Jun Luo<sup>*</sup>, Zhiwei Zheng*, Hanxiao Wang, Li Luo, Lingkun Wen, Linlong Wu, Sheng Xu<sup>&dagger;</sup></p>
-                                            <p><em>International Conference on Learning Representations (ICLR)</em>, 2025</p>
-                                            <p>[<a href="https://openreview.net/forum?id=tznvtmSEiN&noteId=tznvtmSEiN">OpenReview</a>] [<a href="https://arxiv.org/abs/2411.19671">arXiv</a>] [<a href="https://github.com/yinleung/FSGDM">GitHub</a>]</p>
-                                            </li>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+                            <div class="publication highlight"> 
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 70%; vertical-align: middle;">
+                                                <li>
+                                                <h3 class="paper-title">On the Performance Analysis of Momentum Method: A Frequency Domain Perspective</h3>
+                                                <p><b>Xianliang Li</b><sup>*</sup>, Jun Luo<sup>*</sup>, Zhiwei Zheng*, Hanxiao Wang, Li Luo, Lingkun Wen, Linlong Wu, Sheng Xu<sup>&dagger;</sup></p>
+                                                <p><em>International Conference on Learning Representations (ICLR)</em>, 2025</p>
+                                                <p>[<a href="https://openreview.net/forum?id=tznvtmSEiN&noteId=tznvtmSEiN">OpenReview</a>] [<a href="https://arxiv.org/abs/2411.19671">arXiv</a>] [<a href="https://github.com/yinleung/FSGDM">GitHub</a>]</p>
+                                                </li>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
                         </ul>
 
+                        <h3 class="category-heading">Source Localization and Tracking</h3>
                         <ul>
-                        <div class="publication">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <td style="width: 100%; vertical-align: middle;">
-                                            <li>
-                                            <h3 class="paper-title">Time-of-Arrival Simultaneous Sensor and Target Localization With Dynamic Optimal Sensor Placements</h3>
-                                            <p><b>Xianliang Li</b>, Sheng Xu<sup>&dagger;</sup>, K. C. Ho</p>
-                                            <p><em>IEEE Transactions on Aerospace and Electronic Systems</em>, 2025</p>
-                                            <p>[<a href="https://ieeexplore.ieee.org/document/11015991">IEEEXplore</a>]</p>
-                                            </li>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    </ul>
+                            <div class="publication highlight">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 100%; vertical-align: middle;">
+                                                <li>
+                                                <h3 class="paper-title">Time-of-Arrival Simultaneous Sensor and Target Localization With Dynamic Optimal Sensor Placements</h3>
+                                                <p><b>Xianliang Li</b>, Sheng Xu<sup>&dagger;</sup>, K. C. Ho</p>
+                                                <p><em>IEEE Transactions on Aerospace and Electronic Systems</em>, 2025</p>
+                                                <p>[<a href="https://ieeexplore.ieee.org/document/11015991">IEEEXplore</a>]</p>
+                                                </li>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
 
-                    <div class="content">
+                            <div class="publication">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 100%; vertical-align: middle;">
+                                                <li>
+                                                <h3 class="paper-title">AOA Sensor Placement for Anchor-Assisted Target Localization in GNSS-Denied Environment: Formulation, Bounds and Optimization</h3>
+                                                <p>Sheng Xu, Linlong Wu, <b>Xianliang Li</b>, Xinyu Wu, Tiantian Xu<sup>&dagger;</sup></p>
+                                                <p><em>IEEE Transactions on Mobile Computing</em>, 2025</p>
+                                                <p>[<a href="https://ieeexplore.ieee.org/abstract/document/11005986">IEEEXplore</a>]</p>
+                                                </li>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="publication">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 100%; vertical-align: middle;">
+                                                <li>
+                                                <h3 class="paper-title">Systematical sensor path optimization solutions for AOA target localization accuracy improvement with theoretical analysis</h3>
+                                                <p>Sheng Xu, Bing Zhu, <b>Xianliang Li</b>, Xinyu Wu, Tiantian Xu<sup>&dagger;</sup></p>
+                                                <p><em>IEEE Transactions on Vehicular Technology</em>, 2025</p>
+                                                <p>[<a href="https://ieeexplore.ieee.org/abstract/document/10574382">IEEEXplore</a>]</p>
+                                                </li>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="publication">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 100%; vertical-align: middle;">
+                                                <li>
+                                                <h3 class="paper-title">3D Source Tracking Using a Position-Unknown AOA Sensor with Measurement Drift and UAV Moving Direction Optimization</h3>
+                                                <p>Rongrong Xu, Sheng Xu<sup>&dagger;</sup>, Kaimin Cao<sup>&dagger;</sup>, <b>Xianliang Li</b>, Jialiang Wang, Wujing Cao</p>
+                                                <p><em>IEEE International Conference on Real-time Computing and Robotics (RCAR)</em>, 2025</p>
+                                                <p>[<a href="https://ieeexplore.ieee.org/abstract/document/10670780">IEEEXplore</a>]</p>
+                                                </li>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </ul>
+                    </div>
+
+                    <!-- <div class="content">
                         <h2>Education</h2>
                         <ul>
                             <li>
@@ -185,12 +255,12 @@
                                 <p>2018/09 - 2022/06</p>
                             </li>
                         </ul>
-                    </div>
+                    </div> -->
 
                     <!-- Footer -->
                     <div class="content">
                         <p style="text-align: right; font-size: x-small;">
-                            Website updated 2025/09/10. This site is based on <a href="https://jonbarron.info/" style="font-size: inherit;">Jonathon Barron's website</a>.
+                            Website updated 2025/09/10.
                         </p>
                     </div>
                 </td>
