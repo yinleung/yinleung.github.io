@@ -52,8 +52,8 @@
             font-family: 'Times New Roman', Times, serif;
             font-weight: normal;
             font-size: 19px;
-            color: #000000; 
-            margin-top: 0px; 
+            color: #000000;
+            margin-top: 0px;
         }
 
         .category-heading {
@@ -63,29 +63,69 @@
             color: #333;
             border-bottom: 2px solid #ccc;
             padding-bottom: 5px;
-            margin-top: 25px; 
-            margin-left: 20px; 
-        }
-
-        .highlight {
-            background-color: #fff9e6; 
-            border-radius: 8px; 
-            padding: 10px 5px; 
-            border: 1px solid #f0e6c3; 
+            margin-top: 25px;
+            margin-left: 20px;
         }
 
         .paper-title a {
             color: #0077b6;
-            text-decoration: none; 
+            text-decoration: none;
         }
 
         .paper-title a:hover {
-            text-decoration: underline; 
+            text-decoration: underline;
         }
 
-
         .publication {
-            margin-top: 4px; 
+            margin-top: 4px;
+        }
+
+        .publication-hidden {
+            display: none;
+        }
+
+        .works-toggle-row {
+            text-align: center;
+            margin: 14px 0 6px;
+        }
+
+        .works-toggle {
+            padding: 6px 18px;
+            border: 1px solid #c9d3e2;
+            border-radius: 999px;
+            background: #ffffff;
+            color: #1772d0;
+            font-family: Georgia, 'Helvetica', serif;
+            font-size: 16px;
+            line-height: 1.4;
+            cursor: pointer;
+            transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .works-toggle:hover,
+        .works-toggle:focus-visible {
+            color: #f09228;
+            border-color: #f0c28b;
+            background-color: #fffaf2;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+            outline: none;
+        }
+
+        .news-list {
+            margin: 8px 0 0 0;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .news-list li {
+            margin: 8px 0;
+        }
+
+        .news-date {
+            display: inline-block;
+            width: 95px;
+            font-family: 'Lato', Arial, sans-serif;
+            font-weight: 700;
         }
     </style>
 </head>
@@ -105,9 +145,9 @@
                                         李賢亮
                                     </p>
                                     <p style="text-align: center; font-family: serif, 'Lato', Verdana, Helvetica, sans-serif; font-size: 18px; margin-bottom: 20px;">
-                                        <a href="https://scholar.google.com/citations?user=vQKUgscAAAAJ&hl=en&oi=ao">Google Scholar</a> / 
-                                        <a href="https://github.com/yinleung">GitHub</a> / 
-                                        <a href="https://orcid.org/0009-0001-4532-3968">ORCID</a> / 
+                                        <a href="https://scholar.google.com/citations?user=vQKUgscAAAAJ&hl=en&oi=ao">Google Scholar</a> /
+                                        <a href="https://github.com/yinleung">GitHub</a> /
+                                        <a href="https://orcid.org/0009-0001-4532-3968">ORCID</a> /
                                         <a href="https://yinleung.github.io/files/CV_Xianliang.pdf">CV</a>
                                     </p>
                                     <p style="text-align: left; font-size: 16px;">
@@ -131,8 +171,8 @@
                         <h2>About</h2>
                         <p>
                             I am currently a PhD student at <a href="https://www.ism.ac.jp/index_e.html">The Institute of Statistical Mathematics</a>, and <a href="https://www.soken.ac.jp/en/">The Graduate University for Advanced Studies, SOKENDAI</a>, advised by Prof. <a href="https://hermite.jp/"> Han Bao</a>, as well as a visiting student at <a href="https://www.cuhk.edu.hk/english/index.html">The Chinese University of Hong Kong</a>, advised by Prof. <a href="https://wyliu.com/"> Weiyang Liu</a>.
-                        </p>    
-                        <p>   
+                        </p>
+                        <p>
                             Previously, I received my M.Eng. in Computer Technology at <a href="http://english.siat.cas.cn/">Shenzhen Institutes of Advanced Technology</a> and <a href="https://english.ucas.ac.cn/">University of Chinese Academy of Sciences</a>, where I worked on the research topic of signal processing and localization advised by Prof. <a href="https://scholar.google.com/citations?user=nLsqCz4AAAAJ&hl=en">Sheng Xu</a>. Before that, I received my B.Sc. in Physics at <a href="https://www.sysu.edu.cn/sysuen/">Sun Yat-sen University</a>.
                         </p>
                         <p>
@@ -143,10 +183,13 @@
                     <div class="content">
                         <h2>Research</h2>
                         <p style="font-size: 14px;">*: equal contribution; &dagger; corresponding author(s)</p>
+                        <div class="works-toggle-row">
+                            <button class="works-toggle" id="works-toggle" type="button" aria-expanded="false">Show all works</button>
+                        </div>
 
                         <h3 class="category-heading">Optimizer</h3>
                         <ul>
-                            <div class="publication highlight"> 
+                            <div class="publication">
                                 <table>
                                     <tbody>
                                         <tr>
@@ -166,7 +209,7 @@
 
                         <h3 class="category-heading">Source Localization and Tracking</h3>
                         <ul>
-                            <div class="publication highlight">
+                            <div class="publication">
                                 <table>
                                     <tbody>
                                         <tr>
@@ -183,7 +226,7 @@
                                 </table>
                             </div>
 
-                            <div class="publication">
+                            <div class="publication publication-hidden" data-extra-publication="true">
                                 <table>
                                     <tbody>
                                         <tr>
@@ -200,7 +243,7 @@
                                 </table>
                             </div>
 
-                            <div class="publication">
+                            <div class="publication publication-hidden" data-extra-publication="true">
                                 <table>
                                     <tbody>
                                         <tr>
@@ -217,7 +260,7 @@
                                 </table>
                             </div>
 
-                            <div class="publication">
+                            <div class="publication publication-hidden" data-extra-publication="true">
                                 <table>
                                     <tbody>
                                         <tr>
@@ -239,7 +282,7 @@
                     <div class="content">
                         <h2>Service</h2>
                         <ul>
-                            <li>Reviewer for ICLR 2026, DSP 2026.</li>
+                            <li>Reviewer for ICLR 2026, NeurIPS 2026, DSP 2026.</li>
                         </ul>
                     </div>
 
@@ -253,5 +296,22 @@
             </tr>
         </tbody>
     </table>
+
+    <script>
+        const worksToggle = document.getElementById('works-toggle');
+        const extraPublications = document.querySelectorAll('[data-extra-publication="true"]');
+
+        worksToggle.addEventListener('click', () => {
+            const expanded = worksToggle.getAttribute('aria-expanded') === 'true';
+            const nextExpanded = !expanded;
+
+            extraPublications.forEach((publication) => {
+                publication.classList.toggle('publication-hidden', !nextExpanded);
+            });
+
+            worksToggle.setAttribute('aria-expanded', String(nextExpanded));
+            worksToggle.textContent = nextExpanded ? 'Show selected works' : 'Show all works';
+        });
+    </script>
 </body>
 </html>
