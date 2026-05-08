@@ -187,8 +187,25 @@
                             <button class="works-toggle" id="works-toggle" type="button" aria-expanded="false">Show all works</button>
                         </div>
 
-                        <h3 class="category-heading">Optimizer</h3>
+                        <h3 class="category-heading">Momentum Filtering</h3>
                         <ul>
+                            <div class="publication">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 70%; vertical-align: middle;">
+                                                <li>
+                                                <h3 class="paper-title">Denoise First, Orthogonalize Later: Understanding Momentum in Muon via Spectral Filtering</h3>
+                                                <p><b>Xianliang Li</b><sup>*</sup>, Zihan Zhang<sup>*</sup>, Weiyang Liu, Han Bao<sup>&dagger;</sup></p>
+                                                <p><em>Preprint</em>, 2026</p>
+                                                <p>[<a href="https://yinleung.com/dfol/">Project</a>] [<a href="https://arxiv.org/abs/TBD">arXiv</a>] [<a href="https://github.com/yinleung/Denoise-Ortho">GitHub</a>]</p>
+                                                </li>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
                             <div class="publication">
                                 <table>
                                     <tbody>
@@ -207,7 +224,7 @@
                             </div>
                         </ul>
 
-                        <h3 class="category-heading">Source Localization and Tracking</h3>
+                        <h3 class="category-heading">Localization and Signal Processing</h3>
                         <ul>
                             <div class="publication">
                                 <table>
@@ -218,7 +235,42 @@
                                                 <h3 class="paper-title">Time-of-Arrival Simultaneous Sensor and Target Localization With Dynamic Optimal Sensor Placements</h3>
                                                 <p><b>Xianliang Li</b>, Sheng Xu<sup>&dagger;</sup>, K. C. Ho</p>
                                                 <p><em>IEEE Transactions on Aerospace and Electronic Systems</em>, 2025</p>
+                                                <p style="color: #b48ee0;"><em>This work also studies Momentum Filtering.</em></p>
                                                 <p>[<a href="https://ieeexplore.ieee.org/document/11015991">IEEEXplore</a>]</p>
+                                                </li>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="publication publication-hidden" data-extra-publication="true">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 100%; vertical-align: middle;">
+                                                <li>
+                                                <h3 class="paper-title">Optimal Sensor Placement Using Decentralized TDOA Sensor Network in Source Localization</h3>
+                                                <p>Kang Tang, Sheng Xu<sup>&dagger;</sup>, <b>Xianliang Li</b>, K. C. Ho, He Kong, Kutluyil Dogancay</p>
+                                                <p><em>IEEE Transactions on Aerospace and Electronic Systems</em>, 2026</p>
+                                                <p>[<a href="https://ieeexplore.ieee.org/abstract/document/TBD">IEEEXplore</a>]</p>
+                                                </li>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="publication publication-hidden" data-extra-publication="true">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td style="width: 100%; vertical-align: middle;">
+                                                <li>
+                                                <h3 class="paper-title">3D AOA Target Tracking Using Multiple Distributed UAVs with Unknown Self-Localizations and Dynamic Anchors</h3>
+                                                <p>Rongrong Xu, Sheng Xu<sup>&dagger;</sup>, Xianyong Mu, <b>Xianliang Li</b>, Dashuai Wang, Tiantian Xu</p>
+                                                <p><em>IEEE International Conference on Real-time Computing and Robotics</em>, 2025</p>
+                                                <p>[<a href="https://ieeexplore.ieee.org/abstract/document/11139681">IEEEXplore</a>]</p>
                                                 </li>
                                             </td>
                                         </tr>
@@ -289,7 +341,7 @@
                     <!-- Footer -->
                     <div class="content">
                         <p style="text-align: right; font-size: x-small;">
-                            Website updated April 2026.
+                            <span id="last-updated">Website last updated recently.</span>
                         </p>
                     </div>
                 </td>
@@ -312,6 +364,17 @@
             worksToggle.setAttribute('aria-expanded', String(nextExpanded));
             worksToggle.textContent = nextExpanded ? 'Show selected works' : 'Show all works';
         });
+
+        fetch('https://api.github.com/repos/yinleung/yinleung.github.io/commits?per_page=1')
+            .then((response) => response.ok ? response.json() : Promise.reject(response.status))
+            .then((data) => {
+                if (Array.isArray(data) && data[0] && data[0].commit) {
+                    const date = new Date(data[0].commit.committer.date);
+                    const formatted = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+                    document.getElementById('last-updated').textContent = `Website updated ${formatted}.`;
+                }
+            })
+            .catch(() => {});
     </script>
 </body>
 </html>
