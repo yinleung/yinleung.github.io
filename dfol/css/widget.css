@@ -1,0 +1,307 @@
+/* === Spectral Filtering Widget === */
+
+.widget-root {
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  padding: 28px clamp(20px, 4vw, 36px) 24px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.05);
+  margin-bottom: 28px;
+}
+
+.widget-root.loading {
+  min-height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.widget-error {
+  background: #fef2f2;
+  color: #991b1b;
+  padding: 16px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+.widget-error code {
+  background: #fee2e2;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.widget-eyebrow {
+  font-size: 11.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #2563eb;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.widget-headline {
+  font-size: 20px;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.005em;
+  line-height: 1.4;
+}
+.widget-headline .kbd {
+  font-family: "JetBrains Mono", "SF Mono", monospace;
+  background: #eef2ff;
+  color: #312e81;
+  padding: 1px 8px;
+  border-radius: 5px;
+  font-size: 17px;
+}
+.widget-sub {
+  margin-top: 6px;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.55;
+}
+.widget-sub em { font-style: italic; }
+
+.widget-sub .lg-raw,
+.widget-sub .lg-mom,
+.widget-sub .lg-sig {
+  font-weight: 600;
+}
+.widget-sub .lg-raw   { color: #6b7280; }
+.widget-sub .lg-mom   { color: #1d4ed8; }
+.widget-sub .lg-sig   { color: #111827; }
+
+.widget-charts {
+  margin-top: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.spectrum-chart {
+  width: 100%;
+  height: 320px;
+  display: block;
+}
+.ratio-chart {
+  width: 100%;
+  height: 180px;
+  display: block;
+}
+
+.widget-charts text.axis-label {
+  font-size: 11px;
+  fill: #475569;
+  font-family: "Inter", "Helvetica Neue", sans-serif;
+}
+.widget-charts text.axis-title {
+  font-size: 12px;
+  fill: #334155;
+  font-family: "Inter", sans-serif;
+}
+.widget-charts text.band-label,
+.widget-charts text.ratio-title {
+  font-size: 11px;
+  fill: #1e3a8a;
+  font-style: italic;
+}
+.widget-charts text.ratio-title {
+  fill: #475569;
+  font-style: normal;
+  font-weight: 500;
+}
+
+/* === Controls === */
+
+.widget-controls {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.control-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  align-items: center;
+}
+.control-row.hero label .lab-name { font-weight: 600; color: #0f172a; }
+.control-row.inline {
+  flex-direction: row;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.control-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13.5px;
+  color: #334155;
+}
+.lab-name { font-weight: 500; }
+.lab-sub  { color: #94a3b8; font-weight: 400; font-size: 12px; margin-left: 6px; }
+.lab-val {
+  font-family: "JetBrains Mono", "SF Mono", monospace;
+  font-size: 14px;
+  color: #1d4ed8;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: right;
+}
+
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(to right, #e2e8f0, #e2e8f0);
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+  margin: 4px 0 0;
+}
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #1d4ed8;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(29, 78, 216, 0.35), 0 0 0 1px #c7d2fe;
+  cursor: grab;
+  transition: transform 0.12s ease;
+}
+.slider::-webkit-slider-thumb:active {
+  transform: scale(1.15);
+  cursor: grabbing;
+}
+.slider::-moz-range-thumb {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: #1d4ed8;
+  border: 2.5px solid #ffffff;
+  box-shadow: 0 1px 3px rgba(29, 78, 216, 0.35), 0 0 0 1px #c7d2fe;
+  cursor: grab;
+}
+
+.slider-axis {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10.5px;
+  color: #94a3b8;
+  font-family: "JetBrains Mono", monospace;
+  margin-top: 2px;
+}
+
+.control-mini-label {
+  font-size: 13px;
+  color: #475569;
+  font-weight: 500;
+}
+.control-mini-label.info {
+  color: #94a3b8;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 12px;
+}
+
+.rank-pills {
+  display: inline-flex;
+  background: #f1f5f9;
+  border-radius: 999px;
+  padding: 3px;
+  gap: 2px;
+}
+.pill {
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 12.5px;
+  color: #475569;
+  padding: 4px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-weight: 500;
+}
+.pill:hover { color: #1d4ed8; }
+.pill.active {
+  background: #ffffff;
+  color: #1d4ed8;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+}
+
+.spacer { flex: 1; }
+
+.rank-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.rank-note-sep {
+  color: #cbd5e1;
+  font-weight: 500;
+}
+.rank-note {
+  font-size: 12.5px;
+  color: #312e81;
+  font-family: "Inter", sans-serif;
+  font-style: italic;
+}
+
+.widget-charts text.gap-label {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10.5px;
+  fill: #1e293b;
+  font-weight: 500;
+}
+
+.reset-btn {
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #475569;
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s;
+}
+.reset-btn:hover { background: #f8fafc; color: #0f172a; }
+
+/* === Readout === */
+.widget-readout {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e5e7eb;
+}
+.readout-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 14px;
+}
+.readout-item .r-label {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+.readout-item .r-value {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 16px;
+  color: #0f172a;
+  font-weight: 600;
+}
+
+@media (max-width: 700px) {
+  .widget-root { padding: 22px 16px 18px; border-radius: 12px; }
+  .widget-headline { font-size: 17px; }
+  .spectrum-chart { height: 260px; }
+  .ratio-chart    { height: 150px; }
+}
