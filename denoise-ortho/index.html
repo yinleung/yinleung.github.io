@@ -260,7 +260,7 @@ window.MathJax = {
   <div id="alignment-widget" class="loading">Loading figure…</div>
 
   <p class="subtle">
-    Synthetic generator: rank-$r$ true gradient $G^{\text{sig}} \in \mathbb{R}^{100\times 100}$ plus an ARCH(1)-style martingale-difference perturbation $\Xi_t$ at scale $\sigma$, gradient buffer $K = 1000$, single-trial trajectory, β capped at $0.995$. The three $m\!\times\!n$ matrices are projected onto a fixed 2-D plane (top-2 signal SVD directions for $r \ge 2$; signal direction plus an orthogonal companion for $r = 1$) and rotated $30°$ for display. The cosine and length-ratio readouts are computed in this plane.
+    Synthetic generator: rank-$r$ true gradient $G^{\text{sig}} \in \mathbb{R}^{100\times 100}$ plus an ARCH(1)-style martingale-difference perturbation $\Xi_t$ at scale $\sigma$, gradient buffer $K = 1000$, single-trial trajectory, β capped at $0.995$. The three $m\!\times\!n$ matrices are projected onto a fixed 2-D plane (top-2 signal SVD directions for $r \ge 2$; signal direction plus an orthogonal companion for $r = 1$). The cosine and length-ratio readouts are computed in this plane.
   </p>
 
   <p>The empirical comparison closely tracks the theory: Pre-polar's signal alignment grows with $\beta$ and dominates both other pipelines, while Polar-only is by construction $\beta$-independent. The next figures show the same effect on real NanoGPT gradients.</p>
