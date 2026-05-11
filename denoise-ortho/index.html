@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Denoise First, Orthogonalize Later — Understanding Momentum in Muon</title>
+<meta name="description" content="A theoretical and empirical study of why placing momentum before orthogonalization makes Muon work, framed as a spectral filter on the gradient stream.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Source+Serif+Pro:ital,wght@1,400;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/site.css">
+<link rel="stylesheet" href="css/widget.css">
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$'], ['\\(', '\\)']], displayMath: [['$$','$$'], ['\\[','\\]']] },
+  svg: { fontCache: 'global' },
+  options: { renderActions: { addMenu: [] } }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+</head>
+<body>
+<main>
+
+<header class="page-head">
+  <div class="eyebrow">Momentum Filtering</div>
+  <h1 class="title">Denoise First, Orthogonalize Later<br>
+    <span style="font-family: 'Source Serif Pro', Georgia, serif; font-size:0.7em; color: var(--ink-soft); font-weight: 500; font-style: italic;">Understanding Momentum in Muon via Spectral Filtering</span>
+  </h1>
+
+  <div class="authors">
+    <span class="author"><a class="name" href="https://yinleung.com/" target="_blank" rel="noopener">Xianliang Li</a><sup class="aff-mark">1,2,&#9733;</sup></span>
+    <span class="author"><a class="name" href="https://z-z1han.github.io/" target="_blank" rel="noopener">Zihan Zhang</a><sup class="aff-mark">1,3,&#9733;</sup></span>
+    <span class="author"><a class="name" href="https://wyliu.com/" target="_blank" rel="noopener">Weiyang Liu</a><sup class="aff-mark">4</sup></span>
+    <span class="author"><a class="name" href="https://hermite.jp/" target="_blank" rel="noopener">Han Bao</a><sup class="aff-mark">1,2,5,6,&#9993;</sup></span>
+  </div>
+  <ol class="affs">
+    <li><span class="aff-num">1</span>The Institute of Statistical Mathematics</li>
+    <li><span class="aff-num">2</span>The Graduate Institute for Advanced Studies, SOKENDAI</li>
+    <li><span class="aff-num">3</span>National Institute of Informatics</li>
+    <li><span class="aff-num">4</span>The Chinese University of Hong Kong</li>
+    <li><span class="aff-num">5</span>Tohoku University</li>
+    <li><span class="aff-num">6</span>RIKEN AIP</li>
+  </ol>
+  <div class="aff-notes">
+    <span><span class="aff-mark">&#9733;</span> Equal contribution.</span>
+    <span><span class="aff-mark">&#9993;</span> Correspondence.</span>
+  </div>
+
+  <div class="action-row">
+    <a class="action primary" href="https://arxiv.org/abs/TBD" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      Paper (PDF)
+    </a>
+    <a class="action" href="https://github.com/yinleung/Denoise-Ortho" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+      Code
+    </a>
+    <a class="action" href="#bibtex">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+      BibTeX
+    </a>
+  </div>
+</header>
+
+<!-- ================= TL;DR ================= -->
+<section>
+  <div class="tldr-banner">
+    <strong>TL;DR.</strong> Muon shows strong empirical performance in LLM training, but the theoretical role of momentum remains unclear. We show that momentum in Muon acts as a <em>spectral filter</em>: under a signal-plus-perturbation gradient model, it suppresses perturbations while preserving the dominant gradient signal, enlarging the spectral gap between them and stabilizing the singular subspaces passed to Muon's orthogonalization step. Applying momentum before orthogonalization achieves <em>provably stronger</em> signal alignment than reversing the order or removing momentum — hence the rule: <strong>denoise first, then orthogonalize</strong>.
+  </div>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ================= The pipeline question ================= -->
+<section>
+  <h2>The question Muon raises</h2>
+
+  <p>
+    Muon<a class="cite" href="#ref-jordan2024muon">[1]</a> orthogonalizes a momentum buffer, while Orthogonal-SGDM<a class="cite" href="#ref-tuddenham2022">[2]</a> orthogonalizes each per-step gradient and then averages by momentum. Empirically, Muon wins on LLM pretraining. Yet prior Muon analyses predict heavier momentum offers no convergence benefit and may even degrade it, and they say nothing about why one specific ordering of momentum and orthogonalization should matter.
+  </p>
+
+  <p>
+    Two questions follow: (i) does momentum smoothing matter at all inside Muon, and (ii) if so, why should the polar factor be applied after momentum smoothing rather than before?
+  </p>
+
+  <p>
+    Let $G_t \in \mathbb{R}^{m\times n}$ be the gradient, $M_t = \beta M_{t-1} + (1-\beta)G_t$ the momentum buffer, and $\mathcal{O}(X) = UV^\top$ the polar factor of the SVD $X = U\Sigma V^\top$. Three pipelines combine the same two operations differently:
+  </p>
+
+  <div class="pipeline-grid">
+    <div class="pipeline-card pre">
+      <div class="name">Pre-polar (Muon)</div>
+      <div class="formula">$$\Delta W_t \;\propto\; \mathcal{O}(M_t)$$</div>
+      <div class="meaning">Average first, then orthogonalize. Polar factor acts on the momentum buffer.</div>
+    </div>
+    <div class="pipeline-card post">
+      <div class="name">Post-polar (Orthogonal-SGDM)</div>
+      <div class="formula">$$\widetilde{M}_t \;=\; \beta\, \widetilde{M}_{t-1} \;+\; (1-\beta)\,\mathcal{O}(G_t)$$</div>
+      <div class="meaning">Orthogonalize per step, then average. Polar factor erases amplitude before averaging.</div>
+    </div>
+    <div class="pipeline-card po">
+      <div class="name">Polar-only</div>
+      <div class="formula">$$\Delta W_t \;\propto\; \mathcal{O}(G_t)$$</div>
+      <div class="meaning">No momentum at all. Polar factor acts on the raw stochastic gradient.</div>
+    </div>
+  </div>
+
+  <p>The end-to-end loss curves on NanoGPT and LLaMA 350M show a clean separation that persists for the entire training run.</p>
+
+  <div class="fig-grid-2">
+    <figure class="figure">
+      <img src="assets/fig_intro_e2e_nanogpt.png" alt="NanoGPT validation loss">
+      <figcaption><strong>NanoGPT.</strong> Pre-polar (Muon) achieves the lowest validation loss throughout training.</figcaption>
+    </figure>
+    <figure class="figure">
+      <img src="assets/fig_intro_e2e_llama350m.png" alt="LLaMA 350M validation loss">
+      <figcaption><strong>LLaMA 350M.</strong> Pre-polar's lead survives at scale.</figcaption>
+    </figure>
+  </div>
+
+  <p>
+    Two conclusions follow. First, the Pre-polar and Post-polar pipelines use the same two operations in opposite orders, so any gap between them must come from the ordering itself — momentum and orthogonalization do not commute as numerical operations. Second, the gap from Pre-polar to Polar-only shows that momentum supplies value the polar factor alone cannot recover: it is an essential component of Muon, not a cosmetic acceleration trick. This raises the central question of our interest:
+  </p>
+
+  <div class="central-question">
+    <p>What role does momentum play on the gradient stream, and why does placing it before orthogonalization matter inside Muon?</p>
+  </div>
+
+  <p>
+    We answer it in two stages. Momentum opens a spectral gap on the gradient stream and produces a more reliable momentum matrix for orthogonalization (<a href="#result1">Result 1, Theorem 1 and Corollary 1</a>), and Pre-polar achieves provably stronger signal alignment than Post-polar or Polar-only (<a href="#result2">Result 2, Theorem 2</a>).
+  </p>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ================= Result 1 — Theorem 1 + Cor 1 ================= -->
+<section id="result1">
+  <h2>Result&nbsp;1 · Momentum opens a spectral gap</h2>
+
+  <p>
+    Decompose the gradient as a coherent rank-$r$ signal plus a martingale-difference perturbation,
+    $G_t = G_t^{\text{sig}} + \Xi_t$, with bounded variance $\mathbb{E}\|\Xi_t\|_F^2 \le \eta$. Let $T = 1/(1-\beta)$ be the effective momentum window size. Then the momentum buffer $M_t$ both <em>preserves</em> the coherent signal singular values and <em>attenuates</em> the perturbation tail.
+  </p>
+
+  <div class="card theorem">
+    <div class="thm-tag">Theorem 1</div>
+    <p class="thm-name">Spectral gap of the momentum buffer.</p>
+    <p class="thm-body">
+      Under Assumptions&nbsp;1 and&nbsp;2, with probability at least $1 - (2T-1)^{-1/2}$,
+      $$
+        \begin{aligned}
+        \sigma_k(M_t) &\;\ge\; c_{\text{sig}}\lambda_k \;-\; \frac{\sqrt{\eta}}{(2T-1)^{1/4}}, \quad k = 1,\ldots,r, \\[2pt]
+        \sigma_{r+1}(M_t) &\;\le\; \frac{\sqrt{\eta}}{(2T-1)^{1/4}}.
+        \end{aligned}
+      $$
+    </p>
+  </div>
+
+  <p style="margin-top: 18px;">
+    The spectral gap of Theorem 1 on a synthetic rank-$r$ spiked-MDS gradient stream (paper Figure 7). As $\beta$ rises, the momentum spectrum (blue) converges to the signal $G^{\text{sig}}$ (amber diamonds) at the head, while the noise tail is attenuated.
+  </p>
+
+  <div id="widget" class="loading">Loading figure…</div>
+
+  <p class="subtle">
+    Synthetic generator: rank-$r$ true gradient $G^{\text{sig}} \in \mathbb{R}^{100\times 100}$ plus an ARCH(1)-style martingale-difference perturbation $\Xi_t$ at scale $\sigma$, gradient buffer $K = 1000$, both panels averaged over 10 trials. β is capped at $0.995$ so the buffer is in its post-transient regime (Assumption&nbsp;2). At the $(r{=}3,\,\sigma{=}1,\,\beta{\le}0.99)$ reference grid, numerics match the paper's Figure&nbsp;7 to within trial variance.
+  </p>
+
+  <p>
+    This is the opposite of the convergence-rate story in prior Muon analyses, which deteriorate with heavy momentum. The next figures show the same effect on real NanoGPT gradients.
+  </p>
+
+  <div class="fig-grid-2">
+    <figure class="figure">
+      <img src="assets/fig_filtering_frozen_spectrum.png" alt="Filtered singular value spectra on NanoGPT">
+      <figcaption><strong>Filtered singular-value spectra on NanoGPT</strong> at <code>h.0.attn.c_proj</code>, step 3000. As β rises, the momentum spectrum (blue) descends toward the mean-gradient spectrum (orange dashed) — head first, tail later.</figcaption>
+    </figure>
+    <figure class="figure">
+      <img src="assets/fig_filtering_frozen_ratio.png" alt="Per-step filtering ratio on NanoGPT">
+      <figcaption><strong>Per-step filtering ratio</strong> $\sigma_k(M_K)/\sigma_k(G_K)$. The head-vs-tail gap is the spectral gap of Theorem 1 read off directly: head preserved, tail suppressed.</figcaption>
+    </figure>
+  </div>
+
+  <p>
+    Theoretically, the gap $\sigma_r(M_t) - \sigma_{r+1}(M_t)$ scales as $\Theta(1) - O(T^{-1/4})$ — it widens as momentum strengthens.
+  </p>
+
+  <p>
+    Theorem 1 controls singular <em>values</em>. The same mechanism extends to singular <em>subspaces</em>: via Wedin's perturbation inequality, the top-$r$ subspaces of $M_t$ approach those of the signal $G_t^{\text{sig}}$ as the effective window size $T$ grows.
+  </p>
+
+  <div class="card theorem">
+    <div class="thm-tag">Corollary 1</div>
+    <p class="thm-name">Singular-subspace reliability.</p>
+    <p class="thm-body">
+      Under the same conditions as Theorem 1, with probability at least $1 - (2T-1)^{-1/2}$,
+      $$
+        \begin{aligned}
+        \|\sin\Theta(\hat U_t, U)\|_2 &\;\le\; \frac{\sqrt{\eta}/(2T-1)^{1/4}}{c_{\text{sig}}\lambda_k - \sqrt{\eta}/(2T-1)^{1/4}} \;=\; O(T^{-1/4}), \\[2pt]
+        \|\sin\Theta(\hat V_t, V)\|_2 &\;\le\; \frac{\sqrt{\eta}/(2T-1)^{1/4}}{c_{\text{sig}}\lambda_k - \sqrt{\eta}/(2T-1)^{1/4}} \;=\; O(T^{-1/4}),
+        \end{aligned}
+      $$
+      where $\hat U_t$, $\hat V_t$ are the top-$r$ left and right singular subspaces of $M_t$, and $U = [u_1, \ldots, u_r]$, $V = [v_1, \ldots, v_r]$ those of the signal $G_t^{\text{sig}}$.
+    </p>
+  </div>
+
+  <p style="margin-top: 18px;">
+    Taken together, Theorem 1 and Corollary 1 say that the polar factor, applied to $M_t$, operates on a matrix whose <em>singular directions are already clean</em> and whose <em>singular values are nearly those of $G^{\text{sig}}$</em> — exactly what the orthogonalization step needs to be reliable.
+  </p>
+
+  <figure class="figure wide">
+    <img src="assets/fig_direction_frozen.png" alt="Subspace alignment error on NanoGPT (frozen)">
+    <figcaption><strong>Subspace alignment error (stationary probe).</strong> Both $\sin\Theta_U$ and $\sin\Theta_V$ decrease with $T$ across ranks $r \in \{1, 5, 10\}$ on NanoGPT step-3000 gradients, at rates similar to or faster than Corollary 1's $(2T-1)^{-1/4}$ guide.</figcaption>
+  </figure>
+
+  <h4>Live training: subspace alignment under non-stationarity</h4>
+  <p>
+    The stationary probe holds the model weights fixed. To check the live training case, we maintain a sliding $K$-step gradient buffer alongside the optimizer during live NanoGPT training and rerun the analysis on the buffer. The signal subspace now drifts step-by-step.
+  </p>
+  <figure class="figure wide">
+    <img src="assets/fig_online_direction.png" alt="Subspace alignment error on NanoGPT (trajectory probe)">
+    <figcaption><strong>Trajectory probe.</strong> Subspace alignment error decays in $T$ at every rank, even as the model trains. Corollary 1's prediction survives the time-varying signal of live training.</figcaption>
+  </figure>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ================= Result 2 — Theorem 2 + 3 ================= -->
+<section id="result2">
+  <h2>Result&nbsp;2 · Pre-polar dominates Post-polar and Polar-only</h2>
+
+  <p>
+    Theorem 1 explains why momentum helps. It does not yet explain why putting momentum <em>before</em> orthogonalization wins over the reverse. The polar factor preserves singular directions but replaces all singular values with ones, so when it acts directly on a noisy gradient, it erases the amplitude gap between signal and noise directions. Subsequent averaging cannot recover what was already destroyed.
+  </p>
+
+  <p>
+    Each pipeline produces an output matrix: $\mathcal{O}(M_t)$ for Pre-polar, $\mathcal{O}(G_t)$ for Polar-only, and $\widetilde{M}_t$ for Post-polar. Measure its <em>signal alignment</em> as the Frobenius inner product with the true signal, $\langle \cdot,\, G^{\text{sig}}\rangle_F$. Theorem 2 below shows that Pre-polar's expected signal alignment exceeds both alternatives by a positive constant gap, once the momentum window size $T$ is large enough.
+  </p>
+
+  <div class="card theorem">
+    <div class="thm-tag">Theorem 2 (informal)</div>
+    <p class="thm-name">Pre-polar dominates Post-polar and Polar-only.</p>
+    <p class="thm-body">
+      For any fixed signal $G^{\text{sig}}$ and any absolutely continuous perturbation, there exists $C > 0$ such that for sufficiently large window size $T = 1/(1-\beta)$,
+      $$\mathbb{E}\!\left[\frac{\langle \mathcal{O}(M_t),\, G^{\text{sig}}\rangle_F}{\langle \mathcal{O}(G^{\text{sig}}),\, G^{\text{sig}}\rangle_F}\right] \;\ge\; \max\!\left\{ \mathbb{E}\!\left[\frac{\langle\mathcal{O}(G_t),\, G^{\text{sig}}\rangle_F}{\langle \mathcal{O}(G^{\text{sig}}),\, G^{\text{sig}}\rangle_F}\right],\;\; \mathbb{E}\!\left[\frac{\langle \widetilde{M}_t,\, G^{\text{sig}}\rangle_F}{\langle \mathcal{O}(G^{\text{sig}}),\, G^{\text{sig}}\rangle_F}\right] \right\} + \tfrac{C}{2}.$$
+    </p>
+  </div>
+
+  <p style="margin-top: 18px;">
+    Pre-polar signal alignment, visualized as arrows in a 2-D plane. The $m\!\times\!n$ matrices $G_K$, $G^{\text{sig}}$, $M_K$ are projected onto a fixed 2-D plane and drawn as arrows from the origin. As $\sigma$ rises, $G_K$ swings away from $G^{\text{sig}}$ in both direction and length; as $\beta$ rises, $M_K$ rotates back onto $G^{\text{sig}}$ and contracts to its length. At $\beta = 0$, $M_K = G_K$; at $\beta \to 1$, $M_K \to G^{\text{sig}}$.
+  </p>
+
+  <div id="alignment-widget" class="loading">Loading figure…</div>
+
+  <p class="subtle">
+    Synthetic generator: rank-$r$ true gradient $G^{\text{sig}} \in \mathbb{R}^{100\times 100}$ plus an ARCH(1)-style martingale-difference perturbation $\Xi_t$ at scale $\sigma$, gradient buffer $K = 1000$, single-trial trajectory, β capped at $0.995$. The three $m\!\times\!n$ matrices are projected onto a fixed 2-D plane (top-2 signal SVD directions for $r \ge 2$; signal direction plus an orthogonal companion for $r = 1$) and rotated $30°$ for display. The cosine and length-ratio readouts are computed in this plane.
+  </p>
+
+  <p>The empirical comparison closely tracks the theory: Pre-polar's signal alignment grows with $\beta$ and dominates both other pipelines, while Polar-only is by construction $\beta$-independent. The next figures show the same effect on real NanoGPT gradients.</p>
+
+  <div class="fig-grid-2">
+    <figure class="figure">
+      <img src="assets/fig_ordering_frozen_beta.png" alt="Pipeline alignment vs beta on NanoGPT">
+      <figcaption><strong>Stationary $\beta$-sweep probe at NanoGPT step 3000.</strong> Pre-polar climbs monotonically with $\beta$; Post-polar is essentially flat; Polar-only is constant.</figcaption>
+    </figure>
+    <figure class="figure">
+      <img src="assets/fig_ordering_frozen_checkpoints_full.png" alt="Pipeline alignment over checkpoints on NanoGPT">
+      <figcaption><strong>Stationary signal alignment probe across training checkpoints, $\beta=0.95$.</strong> Pre-polar's advantage persists, especially during warm-down (steps 4000–5000).</figcaption>
+    </figure>
+  </div>
+
+  <h4>Live training: pipeline ordering survives non-stationarity</h4>
+  <p>
+    Same trajectory probe as in Result 1: a $K$-step sliding gradient buffer alongside live NanoGPT training. The model weights — and the signal subspace — drift step-by-step.
+  </p>
+  <div class="fig-grid-2">
+    <figure class="figure">
+      <img src="assets/fig_online_ordering_beta.png" alt="Trajectory pipeline alignment vs beta">
+      <figcaption><strong>Trajectory $\beta$-sweep probe at step 3000.</strong> Pre-polar still climbs with $\beta$; Post-polar and Polar-only stay flat. Theorem 2's noncommutativity is robust to non-stationary signal.</figcaption>
+    </figure>
+    <figure class="figure">
+      <img src="assets/fig_online_ordering_history.png" alt="Trajectory pipeline alignment over training">
+      <figcaption><strong>Trajectory signal alignment probe over training, $\beta=0.95$.</strong> Pre-polar's lead is stable across the whole training trajectory.</figcaption>
+    </figure>
+  </div>
+
+  <h4>Quantitative refinement under low SNR</h4>
+  <p>
+    Theorem 2 is qualitative — Pre-polar dominates by some positive constant gap. The next result makes the separation concrete in the rank-1 spiked Gaussian setting.
+  </p>
+
+  <div class="card theorem">
+    <div class="thm-tag">Theorem 3</div>
+    <p class="thm-name">Quantitative separation under the rank-1 spiked Gaussian model.</p>
+    <p class="thm-body">
+      In the low-SNR regime $\lambda < 0.25\sigma_\Xi(\sqrt{m}-\sqrt{n})$, the Polar-only signal alignment becomes marginal as the matrix size grows relative to $\lambda$ — Polar-only loses the signal entirely. Pre-polar, in contrast, continues to recover the signal as long as the momentum window $T$ is large.
+    </p>
+  </div>
+
+  <p class="subtle">
+    Ablations across additional NanoGPT attention/MLP projection layers and training checkpoints, CIFAR-10 stationary and trajectory probes, and synthetic ARCH-MDS perturbation variants reproduce the same head-versus-tail spectral gap and Pre-polar's dominance over both other pipelines. See the appendix of the paper for the full grid and per-cell variance.
+  </p>
+</section>
+
+
+<div class="divider"></div>
+
+
+<!-- ================= Takeaway ================= -->
+<section>
+  <h2>Takeaways</h2>
+  <ol>
+    <li>
+      <strong>Momentum is a spectral filter on the gradient stream.</strong> It preserves the coherent signal while attenuating the perturbation, opening the spectral gap of Theorem&nbsp;1.
+    </li>
+    <li>
+      <strong>Denoise first, then orthogonalize.</strong> Pre-polar's dominance over Post-polar and Polar-only is one consequence of this perspective: the polar factor benefits from operating on a buffer whose spectrum has already been denoised.
+    </li>
+    <li>
+      <strong>The mechanism extends beyond Muon.</strong> Spectral filtering is a property of momentum acting on any noisy matrix gradient stream — the same perspective applies to any matrix-based optimizer. This view suggests both new analyses of momentum schedules<a class="cite" href="#ref-li2025momentum">[3]</a> and new optimizer designs.
+    </li>
+  </ol>
+</section>
+
+
+
+<!-- ================= References ================= -->
+<section id="references">
+  <h2>References</h2>
+  <ol class="refs">
+    <li id="ref-jordan2024muon">
+      Jordan, K., Jin, Y., Boza, V., You, J., Cesista, F., Newhouse, L., Bernstein, J.
+      <em>Muon: An optimizer for hidden layers in neural networks.</em>
+      <a href="https://kellerjordan.github.io/posts/muon/" target="_blank" rel="noopener">blog post, 2024</a>.
+    </li>
+    <li id="ref-tuddenham2022">
+      Tuddenham, M., Prügel-Bennett, A., Hare, J.
+      <em>Orthogonalising gradients to speed up neural network optimisation.</em>
+      <a href="https://arxiv.org/abs/2202.07052" target="_blank" rel="noopener">arXiv:2202.07052, 2022</a>.
+    </li>
+    <li id="ref-li2025momentum">
+      Li, X., Luo, J., Zheng, Z., Wang, H., Luo, L., Wen, L., Wu, L., Xu, S.
+      <em>On the Performance Analysis of Momentum Method: A Frequency Domain Perspective.</em>
+      <a href="https://openreview.net/forum?id=tznvtmSEiN" target="_blank" rel="noopener">ICLR 2025</a>.
+    </li>
+  </ol>
+  <p class="subtle refs-note">A full bibliography is given in the paper.</p>
+</section>
+
+
+<!-- ================= BibTeX ================= -->
+<section id="bibtex">
+  <h2>Cite</h2>
+  <div class="bibtex"><button class="copy-btn" onclick="navigator.clipboard.writeText(this.parentElement.innerText.replace(/^copy\s*/i,''))">copy</button>@article{li2026denoise,
+  title  = {Denoise First, Orthogonalize Later: Understanding Momentum in Muon via Spectral Filtering},
+  author = {Li, Xianliang and Zhang, Zihan and Liu, Weiyang and Bao, Han},
+  year   = {2026}
+}</div>
+</section>
+
+
+<footer>
+  <p>Project page for <em>Denoise First, Orthogonalize Later</em>. Built and designed by <a href="https://yinleung.com/"">Xianliang Li</a>.</p>
+</footer>
+
+</main>
+
+<script src="js/widget.js"></script>
+</body>
+</html>

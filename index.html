@@ -4,374 +4,875 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="author" content="Xianliang Li">
-    <title>Xianliang Li</title>
-    <link rel="stylesheet" type="text/css" href="css/stylesheet.css">
+    <meta name="description" content="Xianliang Li (李賢亮) — PhD student at the Institute of Statistical Mathematics, SOKENDAI. Research on optimizers and deep neural network training.">
+    <title>Xianliang Li · 李賢亮</title>
     <link rel="icon" type="image/png" href="images/favicon.ico">
-    <link href="https://fonts.googleapis.com/css?family=LXGW+WenKai+Mono+TC" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&family=LXGW+WenKai+Mono+TC&display=swap" rel="stylesheet">
     <style>
+        /* =========================================================
+           Theme tokens
+           ========================================================= */
+        :root {
+            --bg:          #faf7f1;
+            --bg-card:     #ffffff;
+            --bg-subtle:   #f1ede4;
+            --bg-chip:     #ffffff;
+            --text:        #1a1d24;
+            --text-soft:   #4b5260;
+            --text-muted:  #8a8f9a;
+            --accent:      #1d3557;
+            --accent-soft: #3d5a80;
+            --highlight:   #c97c2d;
+            --highlight-bg:#fbf1e2;
+            --border:      #e6dfd1;
+            --border-soft: #ece6d8;
+            --shadow-sm:   0 1px 2px rgba(28, 31, 40, 0.04);
+            --shadow:      0 1px 2px rgba(28, 31, 40, 0.04), 0 6px 18px rgba(28, 31, 40, 0.05);
+            --shadow-lift: 0 1px 2px rgba(28, 31, 40, 0.05), 0 12px 28px rgba(28, 31, 40, 0.08);
+            --radius:      14px;
+            --radius-sm:   10px;
+            --radius-pill: 999px;
+            --maxw:        880px;
+        }
+
+        [data-theme="dark"] {
+            --bg:          #131418;
+            --bg-card:     #1c1e24;
+            --bg-subtle:   #1f2129;
+            --bg-chip:     #21232b;
+            --text:        #ecead9;
+            --text-soft:   #b6b7b5;
+            --text-muted:  #777a82;
+            --accent:      #8db4d8;
+            --accent-soft: #a3c2dd;
+            --highlight:   #e2a25e;
+            --highlight-bg:#2c2519;
+            --border:      #2a2d36;
+            --border-soft: #23262e;
+            --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow:      0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 18px rgba(0, 0, 0, 0.35);
+            --shadow-lift: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 28px rgba(0, 0, 0, 0.45);
+        }
+
+        /* =========================================================
+           Base
+           ========================================================= */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+
         body {
-            font-family: 'LXGW WenKai Mono TC', 'Lato', Verdana, Helvetica, sans-serif;
-            line-height: 1.6;
             margin: 0;
             padding: 0;
-        }
-        table {
-            width: 100%;
-            max-width: 900px;
-            margin: 0 auto;
-            border-collapse: collapse;
-            padding: 0 4px;
-        }
-        h2 {
-            font-family: 'Lato', Arial, sans-serif;
-            font-weight: 700;
-            color: #000000;
-            margin-bottom: 4px;
-        }
-        h3 {
-            font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-            margin-bottom: 3px;
-        }
-        p {
-            margin: 6px 0;
-        }
-        .profile-photo img {
-            width: 100%;
-            max-width: 230px;
-        }
-        .logo {
-            width: 120px;
-            height: auto;
-        }
-        .content {
-            padding: 4px;
-        }
-
-        .paper-title {
-            font-family: 'Times New Roman', Times, serif;
-            font-weight: normal;
-            font-size: 19px;
-            color: #000000;
-            margin-top: 0px;
-        }
-
-        .category-heading {
-            font-family: 'Lato', Arial, sans-serif;
-            font-size: 22px;
-            font-weight: 700;
-            color: #333;
-            border-bottom: 2px solid #ccc;
-            padding-bottom: 5px;
-            margin-top: 25px;
-            margin-left: 20px;
-        }
-
-        .paper-title a {
-            color: #0077b6;
-            text-decoration: none;
-        }
-
-        .paper-title a:hover {
-            text-decoration: underline;
-        }
-
-        .publication {
-            margin-top: 4px;
-        }
-
-        .publication-hidden {
-            display: none;
-        }
-
-        .works-toggle-row {
-            text-align: center;
-            margin: 14px 0 6px;
-        }
-
-        .works-toggle {
-            padding: 6px 18px;
-            border: 1px solid #c9d3e2;
-            border-radius: 999px;
-            background: #ffffff;
-            color: #1772d0;
-            font-family: Georgia, 'Helvetica', serif;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
             font-size: 16px;
-            line-height: 1.4;
-            cursor: pointer;
-            transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color 0.25s ease, color 0.25s ease;
         }
 
-        .works-toggle:hover,
-        .works-toggle:focus-visible {
-            color: #f09228;
-            border-color: #f0c28b;
-            background-color: #fffaf2;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: color 0.15s ease, border-color 0.15s ease;
+        }
+        a:hover {
+            color: var(--highlight);
+            border-bottom-color: currentColor;
+        }
+
+        ::selection { background: var(--highlight-bg); color: var(--text); }
+
+        /* =========================================================
+           Top nav
+           ========================================================= */
+        .nav {
+            position: sticky;
+            top: 14px;
+            z-index: 50;
+            margin: 14px auto 0;
+            max-width: var(--maxw);
+            padding: 0 24px;
+            display: flex;
+            justify-content: center;
+        }
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px;
+            background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+            backdrop-filter: saturate(140%) blur(12px);
+            -webkit-backdrop-filter: saturate(140%) blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-pill);
+            box-shadow: var(--shadow-sm);
+        }
+        .nav a {
+            display: inline-flex;
+            align-items: center;
+            padding: 7px 14px;
+            color: var(--text-soft);
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            border-radius: var(--radius-pill);
+            border: none;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+        .nav a:hover {
+            background: var(--bg-subtle);
+            color: var(--text);
+        }
+        .nav a.active {
+            background: var(--accent);
+            color: #fff;
+        }
+        [data-theme="dark"] .nav a.active { color: #131418; }
+
+        .theme-toggle {
+            margin-left: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            color: var(--text-soft);
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+        .theme-toggle:hover { background: var(--bg-subtle); color: var(--text); }
+        .theme-toggle svg { width: 16px; height: 16px; }
+        .theme-toggle .icon-moon { display: none; }
+        [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+        [data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+
+        /* =========================================================
+           Layout
+           ========================================================= */
+        main {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        section { margin-top: 56px; }
+        section:first-of-type { margin-top: 36px; }
+
+        .section-title {
+            font-family: 'Newsreader', Georgia, serif;
+            font-weight: 500;
+            font-size: 30px;
+            line-height: 1.2;
+            margin: 0 0 6px;
+            color: var(--text);
+            letter-spacing: -0.01em;
+        }
+        .section-rule {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .section-rule::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* =========================================================
+           Hero
+           ========================================================= */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 40px;
+            align-items: center;
+            padding-top: 24px;
+        }
+        .hero-text { min-width: 0; }
+        .hero-name {
+            font-family: 'Newsreader', Georgia, serif;
+            font-weight: 500;
+            font-size: 46px;
+            line-height: 1.1;
+            margin: 0 0 4px;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+        .hero-name-cn {
+            font-family: 'LXGW WenKai Mono TC', 'Lato', Verdana, Helvetica, sans-serif;
+            font-size: 22px;
+            color: var(--text-soft);
+            margin: 0 0 20px;
+            letter-spacing: 0.04em;
+        }
+        .hero-role {
+            font-size: 15.5px;
+            color: var(--text-soft);
+            margin: 0 0 6px;
+        }
+        .hero-role strong { color: var(--text); font-weight: 600; }
+        .hero-role a { color: var(--text-soft); }
+        .hero-role a:hover { color: var(--highlight); }
+
+        .hero-email {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 14px;
+            padding: 5px 10px;
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 13px;
+            color: var(--text-soft);
+        }
+        .hero-email svg { width: 14px; height: 14px; opacity: 0.65; }
+
+        .hero-photo {
+            position: relative;
+            width: 220px;
+            flex-shrink: 0;
+        }
+        .hero-photo::before {
+            content: "";
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            background: radial-gradient(ellipse at 30% 30%, var(--highlight-bg), transparent 65%);
+            z-index: -1;
+        }
+        .hero-photo img {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+        }
+
+        /* =========================================================
+           Social pills
+           ========================================================= */
+        .pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-pill);
+            font-size: 13.5px;
+            font-weight: 500;
+            color: var(--text-soft);
+            transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease, transform 0.15s ease;
+        }
+        .pill:hover {
+            color: var(--highlight);
+            border-color: var(--highlight);
+            background: var(--bg-card);
+            border-bottom-color: var(--highlight);
+            transform: translateY(-1px);
+        }
+        .pill svg { width: 14px; height: 14px; }
+
+        /* =========================================================
+           Prose
+           ========================================================= */
+        .prose p {
+            margin: 0 0 14px;
+            color: var(--text);
+            font-size: 16px;
+            line-height: 1.75;
+        }
+        .prose p:last-child { margin-bottom: 0; }
+        .prose em { color: var(--text); font-style: italic; font-weight: 500; }
+        .prose strong { font-weight: 600; }
+
+        .highlight-text {
+            background: linear-gradient(180deg, transparent 65%, var(--highlight-bg) 65%);
+            padding: 0 2px;
+        }
+
+        /* =========================================================
+           Research / publications
+           ========================================================= */
+        .research-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .research-note {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin: 0;
+        }
+        .works-toggle {
+            padding: 7px 16px;
+            border: 1px solid var(--border);
+            background: var(--bg-card);
+            color: var(--accent);
+            font-family: inherit;
+            font-size: 13.5px;
+            font-weight: 500;
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease;
+        }
+        .works-toggle:hover, .works-toggle:focus-visible {
+            color: var(--highlight);
+            border-color: var(--highlight);
             outline: none;
         }
 
-        .news-list {
-            margin: 8px 0 0 0;
-            padding-left: 0;
-            list-style: none;
+        .category-heading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 36px 0 14px;
+            font-family: 'Newsreader', Georgia, serif;
+            font-weight: 500;
+            font-size: 22px;
+            color: var(--text);
+            letter-spacing: -0.005em;
         }
-
-        .news-list li {
-            margin: 8px 0;
-        }
-
-        .news-date {
+        .category-heading::before {
+            content: "";
             display: inline-block;
-            width: 95px;
-            font-family: 'Lato', Arial, sans-serif;
-            font-weight: 700;
+            width: 6px;
+            height: 22px;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+        .category-heading.category-blue::before { background: var(--accent); }
+        .category-heading.category-amber::before { background: var(--highlight); }
+
+        .pub-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .pub {
+            display: block;
+            padding: 18px 20px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+        .pub:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lift);
+            border-color: color-mix(in srgb, var(--accent) 25%, var(--border));
+        }
+        .pub.is-hidden { display: none; }
+
+        .pub-title {
+            font-family: 'Newsreader', Georgia, serif;
+            font-weight: 500;
+            font-size: 19px;
+            line-height: 1.35;
+            margin: 0 0 6px;
+            color: var(--text);
+        }
+        .pub-title a { color: var(--text); border-bottom: none; }
+        .pub-title a:hover { color: var(--highlight); }
+
+        .pub-authors {
+            margin: 0 0 4px;
+            font-size: 14.5px;
+            color: var(--text-soft);
+        }
+        .pub-authors .me { color: var(--text); font-weight: 600; }
+
+        .pub-venue {
+            margin: 0 0 10px;
+            font-size: 14px;
+            font-style: italic;
+            color: var(--text-soft);
+        }
+        .pub-venue .venue-name { color: var(--accent); font-weight: 500; font-style: normal; }
+
+        .pub-note {
+            margin: 0 0 10px;
+            font-size: 13.5px;
+            color: var(--highlight);
+            background: var(--highlight-bg);
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: var(--radius-pill);
+            font-style: italic;
+        }
+
+        .pub-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--accent);
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-pill);
+            transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+        }
+        .chip:hover {
+            color: var(--highlight);
+            background: var(--highlight-bg);
+            border-color: var(--highlight);
+            border-bottom-color: var(--highlight);
+        }
+        .chip svg { width: 12px; height: 12px; flex-shrink: 0; opacity: 0.85; }
+        .chip:hover svg { opacity: 1; }
+
+        /* =========================================================
+           Service
+           ========================================================= */
+        .service-card {
+            padding: 20px 22px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+        }
+        .service-card ul {
+            margin: 0;
+            padding-left: 22px;
+            color: var(--text);
+        }
+        .service-card li { margin: 4px 0; }
+
+        /* =========================================================
+           Footer
+           ========================================================= */
+        footer {
+            max-width: var(--maxw);
+            margin: 60px auto 0;
+            padding: 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12.5px;
+            color: var(--text-muted);
+        }
+        footer a { color: var(--text-muted); border-bottom: none; }
+        footer a:hover { color: var(--highlight); }
+
+        /* =========================================================
+           Animations
+           ========================================================= */
+        @media (prefers-reduced-motion: no-preference) {
+            .fade-in {
+                opacity: 0;
+                transform: translateY(8px);
+                animation: fadeIn 0.6s ease-out forwards;
+            }
+            .fade-in.d-1 { animation-delay: 0.05s; }
+            .fade-in.d-2 { animation-delay: 0.12s; }
+            .fade-in.d-3 { animation-delay: 0.19s; }
+            .fade-in.d-4 { animation-delay: 0.26s; }
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* =========================================================
+           Responsive
+           ========================================================= */
+        @media (max-width: 720px) {
+            .hero {
+                grid-template-columns: 1fr;
+                gap: 24px;
+                text-align: left;
+            }
+            .hero-photo {
+                width: 160px;
+                order: -1;
+            }
+            .hero-name { font-size: 36px; }
+            .nav-inner { gap: 0; padding: 4px; }
+            .nav a { padding: 6px 10px; font-size: 13px; }
+            main { padding: 24px 18px 60px; }
+            section { margin-top: 44px; }
+            .section-title { font-size: 26px; }
+        }
+
+        @media (max-width: 440px) {
+            .nav { padding: 0 12px; }
+            .nav a { padding: 6px 8px; font-size: 12.5px; }
         }
     </style>
 </head>
 <body>
-    <table>
-        <tbody>
-            <tr>
-                <td style="padding: 0;">
-                    <table>
-                        <tbody>
-                            <tr>
-                                <td style="padding: 10px; width: 66%; vertical-align: middle;">
-                                    <p style="text-align: center; font-family: Georgia, 'Lato', Verdana, Helvetica, sans-serif; font-size: 32px; margin: 20px 0 10px;">
-                                        Xianliang Li
-                                    </p>
-                                    <p style="text-align: center; font-family: 'LXGW WenKai Mono TC', 'Lato', Verdana, Helvetica, sans-serif; font-size: 20px; margin-bottom: 20px;">
-                                        李賢亮
-                                    </p>
-                                    <p style="text-align: center; font-family: serif, 'Lato', Verdana, Helvetica, sans-serif; font-size: 18px; margin-bottom: 20px;">
-                                        <a href="https://scholar.google.com/citations?user=vQKUgscAAAAJ&hl=en&oi=ao">Google Scholar</a> /
-                                        <a href="https://github.com/yinleung">GitHub</a> /
-                                        <a href="https://orcid.org/0009-0001-4532-3968">ORCID</a> /
-                                        <a href="https://yinleung.github.io/files/CV_Xianliang.pdf">CV</a>
-                                    </p>
-                                    <p style="text-align: left; font-size: 16px;">
-                                        <b>PhD student</b><br>
-                                        The Institute of Statistical Mathematics<br>
-                                        The Graduate University for Advanced Studies, SOKENDAI
-                                    </p>
-                                    <p style="text-align: left; font-size: 16px;">
-                                        <b>Email</b>: li.xianliang (at) ism.ac.jp
-                                    </p>
-                                </td>
-                                <td style="padding:2%;width:40%;max-width:40%">
-                                    <a href="images/portrait.jpg"><img style="width:100%;max-width:100%;object-fit: cover; border-radius: 50%;" alt="profile photo" src="images/portrait.jpg" class="hoverZoomLink"></a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+    <!-- =========================================================
+         SVG icon sprite (referenced by <use> in publication chips)
+         ========================================================= -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
+        <defs>
+            <symbol id="icon-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M2 12h20"/>
+                <path d="M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/>
+            </symbol>
+            <symbol id="icon-paper" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                <path d="M14 3v6h6"/>
+            </symbol>
+            <symbol id="icon-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8z"/>
+            </symbol>
+            <symbol id="icon-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 18 22 12 16 6"/>
+                <polyline points="8 6 2 12 8 18"/>
+            </symbol>
+            <symbol id="icon-book" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </symbol>
+        </defs>
+    </svg>
 
+    <!-- =========================================================
+         Sticky navigation
+         ========================================================= -->
+    <nav class="nav" aria-label="Primary">
+        <div class="nav-inner">
+            <a href="#about">About</a>
+            <a href="#research">Research</a>
+            <a href="#service">Service</a>
+            <a href="https://yinleung.github.io/files/CV_Xianliang.pdf">CV</a>
+            <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4"/>
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
 
-                    <div class="content">
-                        <h2>About</h2>
-                        <p>
-                            I am currently a PhD student at <a href="https://www.ism.ac.jp/index_e.html">The Institute of Statistical Mathematics</a>, and <a href="https://www.soken.ac.jp/en/">The Graduate University for Advanced Studies, SOKENDAI</a>, advised by Prof. <a href="https://hermite.jp/"> Han Bao</a>, as well as a visiting student at <a href="https://www.cuhk.edu.hk/english/index.html">The Chinese University of Hong Kong</a>, advised by Prof. <a href="https://wyliu.com/"> Weiyang Liu</a>.
-                        </p>
-                        <p>
-                            Previously, I received my M.Eng. in Computer Technology at <a href="http://english.siat.cas.cn/">Shenzhen Institutes of Advanced Technology</a> and <a href="https://english.ucas.ac.cn/">University of Chinese Academy of Sciences</a>, where I worked on the research topic of signal processing and localization advised by Prof. <a href="https://scholar.google.com/citations?user=nLsqCz4AAAAJ&hl=en">Sheng Xu</a>. Before that, I received my B.Sc. in Physics at <a href="https://www.sysu.edu.cn/sysuen/">Sun Yat-sen University</a>.
-                        </p>
-                        <p>
-                            Research interests: Deep Learning Theory, Optimizer.
-                        </p>
+    <main>
+        <!-- =========================================================
+             Hero
+             ========================================================= -->
+        <header class="hero fade-in">
+            <div class="hero-text">
+                <h1 class="hero-name">Xianliang Li</h1>
+                <p class="hero-name-cn">李賢亮</p>
+                <p class="hero-role">
+                    <strong>PhD student</strong> · The Institute of Statistical Mathematics
+                </p>
+                <p class="hero-role">
+                    The Graduate University for Advanced Studies, SOKENDAI
+                </p>
+                <p class="hero-email" aria-label="Email address">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="14" rx="2"/>
+                        <path d="m3 7 9 6 9-6"/>
+                    </svg>
+                    li.xianliang (at) ism.ac.jp
+                </p>
+                <div class="pills" role="list">
+                    <a class="pill" role="listitem" href="https://scholar.google.com/citations?user=vQKUgscAAAAJ&hl=en&oi=ao" aria-label="Google Scholar profile">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 1.5 1 8.5l4 2.5v6.5l7 4 7-4V11l4-2.5L12 1.5zm0 13.7L5 12v-1l7 4.5L19 11v1l-7 3.2zM12 14.5 3.4 9 12 3.5 20.6 9 12 14.5z"/></svg>
+                        Google Scholar
+                    </a>
+                    <a class="pill" role="listitem" href="https://github.com/yinleung" aria-label="GitHub profile">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56 0-.27-.01-1.16-.02-2.1-3.2.69-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11.06 11.06 0 0 1 5.78 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.12 3.05.74.81 1.18 1.83 1.18 3.09 0 4.42-2.69 5.39-5.25 5.68.41.35.78 1.04.78 2.1 0 1.51-.01 2.73-.01 3.1 0 .31.21.68.8.56C20.21 21.39 23.5 17.07 23.5 12 23.5 5.65 18.35.5 12 .5z"/></svg>
+                        GitHub
+                    </a>
+                    <a class="pill" role="listitem" href="https://orcid.org/0009-0001-4532-3968" aria-label="ORCID profile">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12s5.37 12 12 12 12-5.37 12-12S18.63 0 12 0zM7.37 18.13H5.62V7.37h1.75v10.76zM6.5 6.43a1.07 1.07 0 1 1 0-2.14 1.07 1.07 0 0 1 0 2.14zm12.42 11.7h-3.06c-3.16 0-5.27-2.06-5.27-5.31 0-3.59 2.47-5.31 5.41-5.31 1.39 0 2.79.15 2.92.17v10.45zm-1.75-8.92s-.65-.07-1.31-.07c-2.05 0-3.45 1.23-3.45 3.59 0 2.41 1.49 3.59 3.45 3.59h1.31V9.21z"/></svg>
+                        ORCID
+                    </a>
+                    <a class="pill" role="listitem" href="https://yinleung.github.io/files/CV_Xianliang.pdf" aria-label="Curriculum Vitae">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <path d="M14 2v6h6"/>
+                            <path d="M8 13h8M8 17h5"/>
+                        </svg>
+                        CV
+                    </a>
+                </div>
+            </div>
+            <div class="hero-photo">
+                <a href="images/portrait.jpg">
+                    <img src="images/portrait.jpg" alt="Portrait of Xianliang Li">
+                </a>
+            </div>
+        </header>
+
+        <!-- =========================================================
+             About
+             ========================================================= -->
+        <section id="about" class="fade-in d-1">
+            <h2 class="section-title">About</h2>
+            <div class="section-rule">Bio</div>
+            <div class="prose">
+                <p>
+                    I am currently a PhD student at <a href="https://www.ism.ac.jp/index_e.html">The Institute of Statistical Mathematics</a> and <a href="https://www.soken.ac.jp/en/">The Graduate University for Advanced Studies, SOKENDAI</a>, advised by Prof. <a href="https://hermite.jp/">Han Bao</a>, as well as a visiting student at <a href="https://www.cuhk.edu.hk/english/index.html">The Chinese University of Hong Kong</a>, advised by Prof. <a href="https://wyliu.com/">Weiyang Liu</a>.
+                </p>
+                <p>
+                    Previously, I received my M.Eng. in Computer Technology at <a href="http://english.siat.cas.cn/">Shenzhen Institutes of Advanced Technology</a> and <a href="https://english.ucas.ac.cn/">University of Chinese Academy of Sciences</a>, where I worked on signal processing and localization advised by Prof. <a href="https://scholar.google.com/citations?user=nLsqCz4AAAAJ&hl=en">Sheng Xu</a>. Before that, I received my B.Sc. in Physics at <a href="https://www.sysu.edu.cn/sysuen/">Sun Yat-sen University</a>.
+                </p>
+                <p>
+                    <strong>Research interest.</strong> I am interested in the theoretical understanding of optimizers and deep neural network training. I also work on developing new optimizers and training paradigms. My recent research highlight is the <em><span class="highlight-text">Momentum Filtering</span></em>, which provides a filtering perspective on the behavior of momentum-based optimizers.
+                </p>
+            </div>
+        </section>
+
+        <!-- =========================================================
+             Research
+             ========================================================= -->
+        <section id="research" class="fade-in d-2">
+            <h2 class="section-title">Research</h2>
+            <div class="section-rule">Publications</div>
+
+            <div class="research-meta">
+                <p class="research-note"><sup>*</sup> equal contribution &nbsp;·&nbsp; <sup>†</sup> corresponding author</p>
+                <button class="works-toggle" id="works-toggle" type="button" aria-expanded="false">Show all works</button>
+            </div>
+
+            <h3 class="category-heading category-blue">Momentum Filtering</h3>
+            <ul class="pub-list">
+                <li class="pub">
+                    <h4 class="pub-title">
+                        <a href="https://yinleung.com/dfol/">Denoise First, Orthogonalize Later: Understanding Momentum in Muon via Spectral Filtering</a>
+                    </h4>
+                    <p class="pub-authors">
+                        <span class="me">Xianliang Li</span><sup>*</sup>, Zihan Zhang<sup>*</sup>, Weiyang Liu, Han Bao<sup>†</sup>
+                    </p>
+                    <p class="pub-venue"><span class="venue-name">Preprint</span>, 2026</p>
+                    <div class="pub-links">
+                        <a class="chip" href="https://yinleung.com/dfol/"><svg aria-hidden="true"><use href="#icon-globe"/></svg>Project</a>
+                        <a class="chip" href="https://arxiv.org/abs/TBD"><svg aria-hidden="true"><use href="#icon-paper"/></svg>arXiv</a>
+                        <a class="chip" href="https://github.com/yinleung/Denoise-Ortho"><svg aria-hidden="true"><use href="#icon-code"/></svg>Code</a>
                     </div>
-
-                    <div class="content">
-                        <h2>Research</h2>
-                        <p style="font-size: 14px;">*: equal contribution; &dagger; corresponding author(s)</p>
-                        <div class="works-toggle-row">
-                            <button class="works-toggle" id="works-toggle" type="button" aria-expanded="false">Show all works</button>
-                        </div>
-
-                        <h3 class="category-heading">Momentum Filtering</h3>
-                        <ul>
-                            <div class="publication">
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td style="width: 70%; vertical-align: middle;">
-                                                <li>
-                                                <h3 class="paper-title">Denoise First, Orthogonalize Later: Understanding Momentum in Muon via Spectral Filtering</h3>
-                                                <p><b>Xianliang Li</b><sup>*</sup>, Zihan Zhang<sup>*</sup>, Weiyang Liu, Han Bao<sup>&dagger;</sup></p>
-                                                <p><em>Preprint</em>, 2026</p>
-                                                <p>[<a href="https://yinleung.com/dfol/">Project</a>] [<a href="https://arxiv.org/abs/TBD">arXiv</a>] [<a href="https://github.com/yinleung/Denoise-Ortho">GitHub</a>]</p>
-                                                </li>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="publication">
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td style="width: 70%; vertical-align: middle;">
-                                                <li>
-                                                <h3 class="paper-title">On the Performance Analysis of Momentum Method: A Frequency Domain Perspective</h3>
-                                                <p><b>Xianliang Li</b><sup>*</sup>, Jun Luo<sup>*</sup>, Zhiwei Zheng*, Hanxiao Wang, Li Luo, Lingkun Wen, Linlong Wu, Sheng Xu<sup>&dagger;</sup></p>
-                                                <p><em>International Conference on Learning Representations (ICLR)</em>, 2025</p>
-                                                <p>[<a href="https://openreview.net/forum?id=tznvtmSEiN&noteId=tznvtmSEiN">OpenReview</a>] [<a href="https://arxiv.org/abs/2411.19671">arXiv</a>] [<a href="https://github.com/yinleung/FSGDM">GitHub</a>]</p>
-                                                </li>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </ul>
-
-                        <h3 class="category-heading">Localization and Signal Processing</h3>
-                        <ul>
-                            <div class="publication">
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td style="width: 100%; vertical-align: middle;">
-                                                <li>
-                                                <h3 class="paper-title">Time-of-Arrival Simultaneous Sensor and Target Localization With Dynamic Optimal Sensor Placements</h3>
-                                                <p><b>Xianliang Li</b>, Sheng Xu<sup>&dagger;</sup>, K. C. Ho</p>
-                                                <p><em>IEEE Transactions on Aerospace and Electronic Systems</em>, 2025</p>
-                                                <p style="color: #b48ee0;"><em>This work also studies Momentum Filtering.</em></p>
-                                                <p>[<a href="https://ieeexplore.ieee.org/document/11015991">IEEEXplore</a>]</p>
-                                                </li>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="publication publication-hidden" data-extra-publication="true">
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td style="width: 100%; vertical-align: middle;">
-                                                <li>
-                                                <h3 class="paper-title">Optimal Sensor Placement Using Decentralized TDOA Sensor Network in Source Localization</h3>
-                                                <p>Kang Tang, Sheng Xu<sup>&dagger;</sup>, <b>Xianliang Li</b>, K. C. Ho, He Kong, Kutluyil Dogancay</p>
-                                                <p><em>IEEE Transactions on Aerospace and Electronic Systems</em>, 2026</p>
-                                                <p>[<a href="https://ieeexplore.ieee.org/abstract/document/TBD">IEEEXplore</a>]</p>
-                                                </li>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="publication publication-hidden" data-extra-publication="true">
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td style="width: 100%; vertical-align: middle;">
-                                                <li>
-                                                <h3 class="paper-title">3D AOA Target Tracking Using Multiple Distributed UAVs with Unknown Self-Localizations and Dynamic Anchors</h3>
-                                                <p>Rongrong Xu, Sheng Xu<sup>&dagger;</sup>, Xianyong Mu, <b>Xianliang Li</b>, Dashuai Wang, Tiantian Xu</p>
-                                                <p><em>IEEE International Conference on Real-time Computing and Robotics</em>, 2025</p>
-                                                <p>[<a href="https://ieeexplore.ieee.org/abstract/document/11139681">IEEEXplore</a>]</p>
-                                                </li>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="publication publication-hidden" data-extra-publication="true">
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td style="width: 100%; vertical-align: middle;">
-                                                <li>
-                                                <h3 class="paper-title">AOA Sensor Placement for Anchor-Assisted Target Localization in GNSS-Denied Environment: Formulation, Bounds and Optimization</h3>
-                                                <p>Sheng Xu, Linlong Wu, <b>Xianliang Li</b>, Xinyu Wu, Tiantian Xu<sup>&dagger;</sup></p>
-                                                <p><em>IEEE Transactions on Mobile Computing</em>, 2025</p>
-                                                <p>[<a href="https://ieeexplore.ieee.org/abstract/document/11005986">IEEEXplore</a>]</p>
-                                                </li>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="publication publication-hidden" data-extra-publication="true">
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td style="width: 100%; vertical-align: middle;">
-                                                <li>
-                                                <h3 class="paper-title">Systematical Sensor Path Optimization Solutions for AOA Target Localization Accuracy Improvement With Theoretical Analysis</h3>
-                                                <p>Sheng Xu, Bing Zhu, <b>Xianliang Li</b>, Xinyu Wu, Tiantian Xu<sup>&dagger;</sup></p>
-                                                <p><em>IEEE Transactions on Vehicular Technology</em>, 2025</p>
-                                                <p>[<a href="https://ieeexplore.ieee.org/abstract/document/10574382">IEEEXplore</a>]</p>
-                                                </li>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-
-                            <div class="publication publication-hidden" data-extra-publication="true">
-                                <table>
-                                    <tbody>
-                                        <tr>
-                                            <td style="width: 100%; vertical-align: middle;">
-                                                <li>
-                                                <h3 class="paper-title">3D Source Tracking Using a Position-Unknown AOA Sensor with Measurement Drift and UAV Moving Direction Optimization</h3>
-                                                <p>Rongrong Xu, Sheng Xu<sup>&dagger;</sup>, Kaimin Cao<sup>&dagger;</sup>, <b>Xianliang Li</b>, Jialiang Wang, Wujing Cao</p>
-                                                <p><em>IEEE International Conference on Real-time Computing and Robotics</em>, 2025</p>
-                                                <p>[<a href="https://ieeexplore.ieee.org/abstract/document/10670780">IEEEXplore</a>]</p>
-                                                </li>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </ul>
+                </li>
+                <li class="pub">
+                    <h4 class="pub-title">
+                        <a href="https://openreview.net/forum?id=tznvtmSEiN&noteId=tznvtmSEiN">On the Performance Analysis of Momentum Method: A Frequency Domain Perspective</a>
+                    </h4>
+                    <p class="pub-authors">
+                        <span class="me">Xianliang Li</span><sup>*</sup>, Jun Luo<sup>*</sup>, Zhiwei Zheng<sup>*</sup>, Hanxiao Wang, Li Luo, Lingkun Wen, Linlong Wu, Sheng Xu<sup>†</sup>
+                    </p>
+                    <p class="pub-venue"><span class="venue-name">ICLR</span> — International Conference on Learning Representations, 2025</p>
+                    <div class="pub-links">
+                        <a class="chip" href="https://openreview.net/forum?id=tznvtmSEiN&noteId=tznvtmSEiN"><svg aria-hidden="true"><use href="#icon-chat"/></svg>OpenReview</a>
+                        <a class="chip" href="https://arxiv.org/abs/2411.19671"><svg aria-hidden="true"><use href="#icon-paper"/></svg>arXiv</a>
+                        <a class="chip" href="https://github.com/yinleung/FSGDM"><svg aria-hidden="true"><use href="#icon-code"/></svg>Code</a>
                     </div>
+                </li>
+            </ul>
 
-                    <div class="content">
-                        <h2>Service</h2>
-                        <ul>
-                            <li>Reviewer for NeurIPS 2026, ICLR 2026, DSP 2026.</li>
-                        </ul>
+            <h3 class="category-heading category-amber">Localization and Signal Processing</h3>
+            <ul class="pub-list">
+                <li class="pub">
+                    <h4 class="pub-title">
+                        <a href="https://ieeexplore.ieee.org/document/11015991">Time-of-Arrival Simultaneous Sensor and Target Localization With Dynamic Optimal Sensor Placements</a>
+                    </h4>
+                    <p class="pub-authors">
+                        <span class="me">Xianliang Li</span>, Sheng Xu<sup>†</sup>, K. C. Ho
+                    </p>
+                    <p class="pub-venue"><span class="venue-name">IEEE Transactions on Aerospace and Electronic Systems</span>, 2025</p>
+                    <p class="pub-note">This work also involves Momentum Filtering.</p>
+                    <div class="pub-links">
+                        <a class="chip" href="https://ieeexplore.ieee.org/document/11015991"><svg aria-hidden="true"><use href="#icon-book"/></svg>IEEEXplore</a>
                     </div>
+                </li>
 
-                    <!-- Footer -->
-                    <div class="content">
-                        <p style="text-align: right; font-size: x-small;">
-                            <span id="last-updated">Website last updated recently.</span>
-                        </p>
+                <li class="pub is-hidden" data-extra-publication="true">
+                    <h4 class="pub-title">
+                        <a href="https://ieeexplore.ieee.org/abstract/document/TBD">Optimal Sensor Placement Using Decentralized TDOA Sensor Network in Source Localization</a>
+                    </h4>
+                    <p class="pub-authors">
+                        Kang Tang, Sheng Xu<sup>†</sup>, <span class="me">Xianliang Li</span>, K. C. Ho, He Kong, Kutluyil Dogancay
+                    </p>
+                    <p class="pub-venue"><span class="venue-name">IEEE Transactions on Aerospace and Electronic Systems</span>, 2026</p>
+                    <div class="pub-links">
+                        <a class="chip" href="https://ieeexplore.ieee.org/abstract/document/TBD"><svg aria-hidden="true"><use href="#icon-book"/></svg>IEEEXplore</a>
                     </div>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+                </li>
+
+                <li class="pub is-hidden" data-extra-publication="true">
+                    <h4 class="pub-title">
+                        <a href="https://ieeexplore.ieee.org/abstract/document/11139681">3D AOA Target Tracking Using Multiple Distributed UAVs with Unknown Self-Localizations and Dynamic Anchors</a>
+                    </h4>
+                    <p class="pub-authors">
+                        Rongrong Xu, Sheng Xu<sup>†</sup>, Xianyong Mu, <span class="me">Xianliang Li</span>, Dashuai Wang, Tiantian Xu
+                    </p>
+                    <p class="pub-venue"><span class="venue-name">IEEE International Conference on Real-time Computing and Robotics</span>, 2025</p>
+                    <div class="pub-links">
+                        <a class="chip" href="https://ieeexplore.ieee.org/abstract/document/11139681"><svg aria-hidden="true"><use href="#icon-book"/></svg>IEEEXplore</a>
+                    </div>
+                </li>
+
+                <li class="pub is-hidden" data-extra-publication="true">
+                    <h4 class="pub-title">
+                        <a href="https://ieeexplore.ieee.org/abstract/document/11005986">AOA Sensor Placement for Anchor-Assisted Target Localization in GNSS-Denied Environment: Formulation, Bounds and Optimization</a>
+                    </h4>
+                    <p class="pub-authors">
+                        Sheng Xu, Linlong Wu, <span class="me">Xianliang Li</span>, Xinyu Wu, Tiantian Xu<sup>†</sup>
+                    </p>
+                    <p class="pub-venue"><span class="venue-name">IEEE Transactions on Mobile Computing</span>, 2025</p>
+                    <div class="pub-links">
+                        <a class="chip" href="https://ieeexplore.ieee.org/abstract/document/11005986"><svg aria-hidden="true"><use href="#icon-book"/></svg>IEEEXplore</a>
+                    </div>
+                </li>
+
+                <li class="pub is-hidden" data-extra-publication="true">
+                    <h4 class="pub-title">
+                        <a href="https://ieeexplore.ieee.org/abstract/document/10574382">Systematical Sensor Path Optimization Solutions for AOA Target Localization Accuracy Improvement With Theoretical Analysis</a>
+                    </h4>
+                    <p class="pub-authors">
+                        Sheng Xu, Bing Zhu, <span class="me">Xianliang Li</span>, Xinyu Wu, Tiantian Xu<sup>†</sup>
+                    </p>
+                    <p class="pub-venue"><span class="venue-name">IEEE Transactions on Vehicular Technology</span>, 2025</p>
+                    <div class="pub-links">
+                        <a class="chip" href="https://ieeexplore.ieee.org/abstract/document/10574382"><svg aria-hidden="true"><use href="#icon-book"/></svg>IEEEXplore</a>
+                    </div>
+                </li>
+
+                <li class="pub is-hidden" data-extra-publication="true">
+                    <h4 class="pub-title">
+                        <a href="https://ieeexplore.ieee.org/abstract/document/10670780">3D Source Tracking Using a Position-Unknown AOA Sensor with Measurement Drift and UAV Moving Direction Optimization</a>
+                    </h4>
+                    <p class="pub-authors">
+                        Rongrong Xu, Sheng Xu<sup>†</sup>, Kaimin Cao, <span class="me">Xianliang Li</span>, Jialiang Wang, Wujing Cao
+                    </p>
+                    <p class="pub-venue"><span class="venue-name">IEEE International Conference on Real-time Computing and Robotics</span>, 2025</p>
+                    <div class="pub-links">
+                        <a class="chip" href="https://ieeexplore.ieee.org/abstract/document/10670780"><svg aria-hidden="true"><use href="#icon-book"/></svg>IEEEXplore</a>
+                    </div>
+                </li>
+            </ul>
+        </section>
+
+        <!-- =========================================================
+             Service
+             ========================================================= -->
+        <section id="service" class="fade-in d-3">
+            <h2 class="section-title">Service</h2>
+            <div class="section-rule">Reviewing</div>
+            <div class="service-card">
+                <ul>
+                    <li>Reviewer for NeurIPS 2026, ICLR 2026, DSP 2026.</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <span id="last-updated">Website last updated recently.</span>
+        <span>© Xianliang Li 2026</span>
+    </footer>
 
     <script>
+        /* =====================================================
+           Theme toggle (respects system preference + localStorage)
+           ===================================================== */
+        (function() {
+            const storageKey = 'theme';
+            const root = document.documentElement;
+            const stored = localStorage.getItem(storageKey);
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const initial = stored || (systemDark ? 'dark' : 'light');
+            root.setAttribute('data-theme', initial);
+
+            const toggle = document.getElementById('theme-toggle');
+            toggle.addEventListener('click', () => {
+                const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                root.setAttribute('data-theme', next);
+                localStorage.setItem(storageKey, next);
+            });
+        })();
+
+        /* =====================================================
+           Publication show-all toggle
+           ===================================================== */
         const worksToggle = document.getElementById('works-toggle');
-        const extraPublications = document.querySelectorAll('[data-extra-publication="true"]');
+        const extraPubs = document.querySelectorAll('[data-extra-publication="true"]');
 
         worksToggle.addEventListener('click', () => {
             const expanded = worksToggle.getAttribute('aria-expanded') === 'true';
             const nextExpanded = !expanded;
 
-            extraPublications.forEach((publication) => {
-                publication.classList.toggle('publication-hidden', !nextExpanded);
-            });
-
+            extraPubs.forEach(p => p.classList.toggle('is-hidden', !nextExpanded));
             worksToggle.setAttribute('aria-expanded', String(nextExpanded));
             worksToggle.textContent = nextExpanded ? 'Show selected works' : 'Show all works';
         });
 
+        /* =====================================================
+           Active section in navigation
+           ===================================================== */
+        const navLinks = document.querySelectorAll('.nav a[href^="#"]');
+        const sections = Array.from(navLinks).map(a => document.querySelector(a.getAttribute('href')));
+
+        const setActive = (id) => {
+            navLinks.forEach(a => {
+                a.classList.toggle('active', a.getAttribute('href') === '#' + id);
+            });
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) setActive(entry.target.id);
+            });
+        }, { rootMargin: '-40% 0px -55% 0px', threshold: 0 });
+
+        sections.forEach(s => s && observer.observe(s));
+
+        /* =====================================================
+           Last-updated from GitHub
+           ===================================================== */
         fetch('https://api.github.com/repos/yinleung/yinleung.github.io/commits?per_page=1')
-            .then((response) => response.ok ? response.json() : Promise.reject(response.status))
-            .then((data) => {
+            .then(r => r.ok ? r.json() : Promise.reject(r.status))
+            .then(data => {
                 if (Array.isArray(data) && data[0] && data[0].commit) {
                     const date = new Date(data[0].commit.committer.date);
                     const formatted = date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
-                    document.getElementById('last-updated').textContent = `Website updated ${formatted}.`;
+                    document.getElementById('last-updated').textContent = `Last updated ${formatted}`;
                 }
             })
             .catch(() => {});

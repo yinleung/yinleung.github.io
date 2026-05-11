@@ -7,15 +7,16 @@ const SVG_NS = "http://www.w3.org/2000/svg";
 
 const COLORS = {
   raw:        "#9ca3af",
-  rawFill:    "#e5e7eb",
-  momentum:   "#1d4ed8",
-  momFill:    "#dbeafe",
-  signal:     "#111827",
+  rawFill:    "#e6dfd1",
+  momentum:   "#1d3557",          // deep navy — personal-site accent (spectrum line, kbd, slider)
+  momFill:    "#d6e0ec",
+  signal:     "#7c2d3a",          // burgundy — true gradient G^sig (spectrum diamonds, gap line)
+  signalFill: "#f5e1e5",
   ratio:      "#0d9488",
   ratioFill:  "rgba(13, 148, 136, 0.18)",
   guideline:  "#cbd5e1",
-  axis:       "#475569",
-  axisLight:  "#94a3b8",
+  axis:       "#4b5260",
+  axisLight:  "#8a8f9a",
 };
 
 const X_AXIS_MAX = 40;            // show first 40 singular values
@@ -79,7 +80,6 @@ function diamondPath(cx, cy, r) {
   return `M${cx},${cy - r}L${cx + r},${cy}L${cx},${cy + r}L${cx - r},${cy}Z`;
 }
 
-
 // ----------------------------------------------------------------
 //                         SpectrumWidget
 // ----------------------------------------------------------------
@@ -96,7 +96,7 @@ class SpectrumWidget {
     this.state = {
       rank: this.meta.default_rank,
       sigmaIdx: this.meta.default_sigma_idx,
-      betaIdx: this.meta.default_beta_idx,
+      betaIdx: 0,
     };
 
     this.specMargin = { top: 22, right: 24, bottom: 38, left: 58 };
@@ -123,9 +123,9 @@ class SpectrumWidget {
     const labelDiv = document.createElement("div");
     labelDiv.className = "widget-header";
     labelDiv.innerHTML =
-      `<div class="widget-eyebrow">Interactive · Spectral Filtering Widget</div>
-       <div class="widget-headline">Drag <span class="kbd">β</span> to watch momentum carve a spectral gap from raw gradient noise.</div>
-       <div class="widget-sub">Synthetic rank-<em>r</em> spiked-MDS gradient stream. Three curves: <span class="lg-raw">raw G<sub>K</sub></span>, <span class="lg-mom">momentum M<sub>K</sub></span>, <span class="lg-sig">planted signal</span>.</div>`;
+      `<div class="widget-eyebrow">Widget 1 · Spectral Filtering</div>
+       <div class="widget-headline">Singular spectra of the raw gradient, momentum, and true gradient signal.</div>
+       <div class="widget-sub">Synthetic rank-<em>r</em> spiked-MDS gradient stream. Three curves: <span class="lg-raw">raw G<sub>K</sub></span>, <span class="lg-sig">true gradient G<sup>sig</sup></span>, <span class="lg-mom">momentum M<sub>K</sub></span>.</div>`;
     this.container.appendChild(labelDiv);
 
     const charts = document.createElement("div");
@@ -219,7 +219,7 @@ class SpectrumWidget {
       this.state = {
         rank: this.meta.default_rank,
         sigmaIdx: this.meta.default_sigma_idx,
-        betaIdx: this.meta.default_beta_idx,
+        betaIdx: 0,
       };
       this.betaSlider.value = this.state.betaIdx;
       this.sigmaSlider.value = this.state.sigmaIdx;
@@ -295,8 +295,8 @@ class SpectrumWidget {
     sp.diamonds = [];
     const MAX_DIAMONDS = 20;
     for (let k = 0; k < MAX_DIAMONDS; k++) {
-      const dPath = svgEl("path", { fill: "#ffffff", stroke: COLORS.signal, "stroke-width": 1.8 });
-      const dot = svgEl("circle", { r: 1.6, fill: COLORS.signal });
+      const dPath = svgEl("path", { fill: COLORS.signalFill, stroke: COLORS.signal, "stroke-width": 1.8 });
+      const dot = svgEl("circle", { r: 1.7, fill: COLORS.signal });
       this.specSVG.appendChild(dPath);
       this.specSVG.appendChild(dot);
       sp.diamonds.push({ diamond: dPath, dot });
@@ -685,6 +685,471 @@ class SpectrumWidget {
     rp.curve.setAttribute("d", pathFromPoints(pts));
     rp.area.setAttribute("d", areaPath(pts, y(0)));
   }
+
+}
+
+
+// ----------------------------------------------------------------
+//                       AlignmentWidget (Panel 3)
+// ----------------------------------------------------------------
+// Three-arrow Cartesian projection of the m×n gradient matrices into a 2-D
+// plane: G_K (raw, grey dashed), G^sig (true, amber), M_K (momentum, blue).
+// Same persistent-SVG-node discipline as SpectrumWidget — the axis frame is
+// built once; per-frame we only mutate `x1`/`y1`/`x2`/`y2`/text on the three
+// arrow lines and labels.
+class AlignmentWidget {
+  constructor(container, payload) {
+    this.container = container;
+    this.payload = payload;
+    this.meta = payload.meta;
+    this.data = payload.data;
+
+    this.state = {
+      rank: this.meta.default_rank,
+      sigmaIdx: this.meta.default_sigma_idx,
+      betaIdx: 0,
+    };
+
+    this.margin = { top: 18, right: 22, bottom: 32, left: 32 };
+    this._dims = { W: 0, H: 0 };
+
+    // Cache per-rank axis half-range and tick step. Computed in two passes so
+    // that the chart edge always lands on a tick (no awkward "ticks at ±30 but
+    // chart extends to ±35" gap).
+    this._axisMaxByRank = {};
+    this._tickStepByRank = {};
+    for (const r of this.meta.ranks) {
+      const d = this.data[String(r)];
+      let maxMag = 0;
+      const consider = (px, py) => {
+        const m = Math.hypot(px, py);
+        if (m > maxMag) maxMag = m;
+      };
+      consider(d.signal_proj[0], d.signal_proj[1]);
+      for (const row of d.raw_proj) consider(row[0], row[1]);
+      for (const row of d.mom_proj) for (const cell of row) consider(cell[0], cell[1]);
+      // 1.1× padding, then snap A up to a multiple of niceStep so ticks reach
+      // the chart edge cleanly.
+      const rawA = maxMag * 1.1;
+      const rough = rawA / 2.5;                 // ~3 ticks per side
+      const exp = Math.floor(Math.log10(rough));
+      const f = rough / Math.pow(10, exp);
+      const niceStep = (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * Math.pow(10, exp);
+      this._axisMaxByRank[r] = Math.ceil(rawA / niceStep) * niceStep;
+      this._tickStepByRank[r] = niceStep;
+    }
+
+    // 30° display rotation so that rank-1 signal arrow is not on the x-axis.
+    const rot = (this.meta.rotation_deg || 30) * Math.PI / 180;
+    this._cos = Math.cos(rot);
+    this._sin = Math.sin(rot);
+
+    this.buildDOM();
+    this.buildStaticSVG();
+    this.attachListeners();
+    this.requestRender(true);
+    window.addEventListener("resize", () => this.handleResize());
+  }
+
+  rotate(p) {
+    return [p[0] * this._cos - p[1] * this._sin,
+            p[0] * this._sin + p[1] * this._cos];
+  }
+
+  // ============ DOM ============
+  buildDOM() {
+    this.container.classList.add("widget-root");
+    this.container.classList.remove("loading");
+    this.container.innerHTML = "";
+
+    const labelDiv = document.createElement("div");
+    labelDiv.className = "widget-header";
+    labelDiv.innerHTML =
+      `<div class="widget-eyebrow">Widget 2 · Signal Alignment</div>
+       <div class="widget-headline">Raw gradient, momentum, and true gradient signal arrow alignments.</div>
+       <div class="widget-sub">Three arrows: <span class="lg-raw">raw G<sub>K</sub></span>, <span class="lg-sig">true gradient G<sup>sig</sup></span>, <span class="lg-mom">momentum M<sub>K</sub></span>. β = 0 ⇒ M<sub>K</sub> = G<sub>K</sub>; β → 1 ⇒ M<sub>K</sub> → G<sup>sig</sup>.</div>`;
+    this.container.appendChild(labelDiv);
+
+    const charts = document.createElement("div");
+    charts.className = "widget-charts";
+    this.container.appendChild(charts);
+
+    this.chartSVG = svgEl("svg", { class: "alignment-chart", preserveAspectRatio: "xMidYMid meet" });
+    charts.appendChild(this.chartSVG);
+
+    const sigmaMin = this.meta.sigma_grid[0];
+    const sigmaMax = this.meta.sigma_grid[this.meta.sigma_grid.length - 1];
+    const sigmaMid = this.meta.sigma_grid[Math.floor(this.meta.sigma_grid.length / 2)];
+
+    const controls = document.createElement("div");
+    controls.className = "widget-controls";
+    controls.innerHTML = `
+      <div class="control-row hero">
+        <label class="control-label">
+          <span class="lab-name">β  <span class="lab-sub">momentum coefficient</span></span>
+          <span class="lab-val" data-bind="beta-val">0.95</span>
+        </label>
+        <input type="range" id="al-beta" class="slider" min="0" max="${this.meta.beta_grid.length - 1}" step="0.01" value="${this.state.betaIdx}">
+        <div class="slider-axis">
+          <span>0</span><span>0.5</span><span>0.9</span><span>0.995</span>
+        </div>
+      </div>
+      <div class="control-row">
+        <label class="control-label">
+          <span class="lab-name">σ <span class="lab-sub">noise scale  ·  λ<sub>1</sub>/σ = <span data-bind="snr-val">3.8</span></span></span>
+          <span class="lab-val" data-bind="sigma-val">3.16</span>
+        </label>
+        <input type="range" id="al-sigma" class="slider" min="0" max="${this.meta.sigma_grid.length - 1}" step="0.01" value="${this.state.sigmaIdx}">
+        <div class="slider-axis">
+          <span>${sigmaMin.toFixed(1)}</span><span>${sigmaMid.toFixed(1)}</span><span>${sigmaMax.toFixed(1)}</span>
+        </div>
+      </div>
+      <div class="control-row inline">
+        <span class="control-mini-label">rank r</span>
+        <div class="rank-pills" role="radiogroup" aria-label="signal rank">
+          ${this.meta.ranks.map(r => `
+            <button class="pill ${r === this.state.rank ? "active" : ""}" data-rank="${r}">r=${r}</button>
+          `).join("")}
+        </div>
+        <div class="rank-meta">
+          <span class="control-mini-label info" data-bind="strength-text">strengths [12, 8, 5]</span>
+        </div>
+        <div class="spacer"></div>
+        <button class="reset-btn" id="al-reset" title="Reset to defaults">reset</button>
+      </div>
+    `;
+    this.container.appendChild(controls);
+
+    const readout = document.createElement("div");
+    readout.className = "widget-readout";
+    readout.innerHTML = `
+      <div class="readout-grid">
+        <div class="readout-item"><div class="r-label">Effective window</div><div class="r-value" data-bind="window-text">T = 20</div></div>
+        <div class="readout-item"><div class="r-label">cos∠(M<sub>K</sub>, G<sup>sig</sup>) <span class="lab-sub">in plane</span></div><div class="r-value" data-bind="mom-cos">—</div></div>
+        <div class="readout-item"><div class="r-label">cos∠(G<sub>K</sub>, G<sup>sig</sup>) <span class="lab-sub">in plane</span></div><div class="r-value" data-bind="raw-cos">—</div></div>
+        <div class="readout-item"><div class="r-label">|M<sub>K</sub>| / |G<sup>sig</sup>| <span class="lab-sub">arrow length ratio</span></div><div class="r-value" data-bind="mom-mag">—</div></div>
+      </div>
+    `;
+    this.container.appendChild(readout);
+
+    this.bind = {};
+    for (const el of this.container.querySelectorAll("[data-bind]")) {
+      this.bind[el.dataset.bind] = el;
+    }
+    this.betaSlider = this.container.querySelector("#al-beta");
+    this.sigmaSlider = this.container.querySelector("#al-sigma");
+  }
+
+  attachListeners() {
+    this.betaSlider.addEventListener("input", (e) => {
+      this.state.betaIdx = parseFloat(e.target.value);
+      this.requestRender();
+    });
+    this.sigmaSlider.addEventListener("input", (e) => {
+      this.state.sigmaIdx = parseFloat(e.target.value);
+      this.requestRender();
+    });
+    for (const btn of this.container.querySelectorAll(".pill")) {
+      btn.addEventListener("click", () => {
+        const r = +btn.dataset.rank;
+        this.state.rank = r;
+        for (const b of this.container.querySelectorAll(".pill")) b.classList.toggle("active", +b.dataset.rank === r);
+        this.requestRender(true);  // axis range changes per rank, rebuild axes
+      });
+    }
+    this.container.querySelector("#al-reset").addEventListener("click", () => {
+      this.state = {
+        rank: this.meta.default_rank,
+        sigmaIdx: this.meta.default_sigma_idx,
+        betaIdx: 0,
+      };
+      this.betaSlider.value = this.state.betaIdx;
+      this.sigmaSlider.value = this.state.sigmaIdx;
+      for (const b of this.container.querySelectorAll(".pill")) b.classList.toggle("active", +b.dataset.rank === this.state.rank);
+      this.requestRender(true);
+    });
+  }
+
+  // ============ Static SVG ============
+  buildStaticSVG() {
+    this.measureDims();
+
+    const W = this._dims.W, H = this._dims.H;
+    this.chartSVG.setAttribute("viewBox", `0 0 ${W} ${H}`);
+
+    // Marker defs — three coloured arrowheads.
+    const defs = svgEl("defs");
+    const makeMarker = (id, color) => {
+      const m = svgEl("marker", {
+        id, viewBox: "0 0 10 10", refX: "8.5", refY: "5",
+        markerWidth: "7", markerHeight: "7", orient: "auto-start-reverse",
+      });
+      const tri = svgEl("path", { d: "M0,1 L9,5 L0,9 Z", fill: color });
+      m.appendChild(tri);
+      return m;
+    };
+    defs.appendChild(makeMarker("arr-raw", "#6b7280"));
+    defs.appendChild(makeMarker("arr-sig", "#7c2d3a"));
+    defs.appendChild(makeMarker("arr-mom", "#1d3557"));
+    this.chartSVG.appendChild(defs);
+
+    // Cartesian frame (gridlines + ticks) — rebuild on rank change.
+    this.frame = {};
+    this.frame.group = svgEl("g", { class: "arrow-frame" });
+    this.chartSVG.appendChild(this.frame.group);
+
+    // Axes (built once, positioned in layoutAxes).
+    this.frame.xAxis = svgEl("line", { class: "axis" });
+    this.frame.yAxis = svgEl("line", { class: "axis" });
+    this.chartSVG.appendChild(this.frame.xAxis);
+    this.chartSVG.appendChild(this.frame.yAxis);
+
+    // Three arrows.
+    this.arrows = {
+      raw: svgEl("line", { class: "arrow-line raw", "marker-end": "url(#arr-raw)" }),
+      sig: svgEl("line", { class: "arrow-line sig", "marker-end": "url(#arr-sig)" }),
+      mom: svgEl("line", { class: "arrow-line mom", "marker-end": "url(#arr-mom)" }),
+    };
+    // Order: raw under sig under mom (mom on top so its alignment with sig is visible).
+    this.chartSVG.appendChild(this.arrows.raw);
+    this.chartSVG.appendChild(this.arrows.sig);
+    this.chartSVG.appendChild(this.arrows.mom);
+
+    // Fixed legend in the top-right corner — preferred over inline labels next
+    // to each arrow tip because the three arrows often cluster (M_K snaps onto
+    // G^sig at high β; G_K is close at low σ) and inline labels stack
+    // unreadably. Legend rows are a coloured arrow stub + label, positioned
+    // in layoutAxes() so they stay flush with the right edge on resize.
+    this.legend = { items: {} };
+    this.legend.group = svgEl("g", { class: "arrow-legend" });
+    const legendRows = [
+      { key: "sig", color: "#7c2d3a", label: "G^sig", dash: null,    width: 2.4 },
+      { key: "mom", color: "#1d3557", label: "M_K",   dash: null,    width: 2.6 },
+      { key: "raw", color: "#6b7280", label: "G_K",   dash: "5 4",   width: 1.6 },
+    ];
+    for (const row of legendRows) {
+      const stub = svgEl("line", {
+        stroke: row.color, "stroke-width": row.width, "stroke-linecap": "round",
+        "marker-end": `url(#arr-${row.key})`,
+      });
+      if (row.dash) stub.setAttribute("stroke-dasharray", row.dash);
+      const text = svgEl("text", { class: `arrow-label ${row.key}`, "text-anchor": "start" });
+      text.textContent = row.label;
+      this.legend.group.appendChild(stub);
+      this.legend.group.appendChild(text);
+      this.legend.items[row.key] = { stub, text };
+    }
+    this.chartSVG.appendChild(this.legend.group);
+
+    this.layoutAxes();
+  }
+
+  measureDims() {
+    const r = this.chartSVG.getBoundingClientRect();
+    this._dims.W = r.width || 720;
+    this._dims.H = r.height || 380;
+  }
+
+  // Square plotting region centred in the SVG. The half-axis range A is set
+  // per rank and rebuilt by layoutAxes() whenever rank changes.
+  layoutAxes() {
+    const m = this.margin;
+    const W = this._dims.W, H = this._dims.H;
+    const innerW = W - m.left - m.right;
+    const innerH = H - m.top - m.bottom;
+    const side = Math.min(innerW, innerH);
+    const cx = m.left + innerW / 2;
+    const cy = m.top + innerH / 2;
+    this._cx = cx;
+    this._cy = cy;
+    this._half = side / 2;
+
+    const A = this._axisMaxByRank[this.state.rank];
+    this._axisMax = A;
+    this._scale = this._half / A;       // pixels per data unit
+
+    // Frame: clear and rebuild gridlines + tick labels.
+    this.frame.group.innerHTML = "";
+    const niceA = this._tickStepByRank[this.state.rank];
+
+    // Gridlines + tick labels (label every gridline; skip 0).
+    for (let v = -A; v <= A + 1e-9; v += niceA) {
+      if (Math.abs(v) < 1e-9) continue;
+      const px = cx + v * this._scale;
+      const py = cy - v * this._scale;
+      this.frame.group.appendChild(svgEl("line", {
+        x1: px, x2: px, y1: cy - this._half, y2: cy + this._half,
+        opacity: "0.45",
+      }));
+      this.frame.group.appendChild(svgEl("line", {
+        x1: cx - this._half, x2: cx + this._half, y1: py, y2: py,
+        opacity: "0.45",
+      }));
+      const xtxt = svgEl("text", { x: px, y: cy + this._half + 14, "text-anchor": "middle" });
+      xtxt.textContent = Number.isInteger(v) ? v : v.toFixed(1);
+      this.frame.group.appendChild(xtxt);
+      const ytxt = svgEl("text", { x: cx - this._half - 6, y: py + 4, "text-anchor": "end" });
+      ytxt.textContent = Number.isInteger(v) ? v : v.toFixed(1);
+      this.frame.group.appendChild(ytxt);
+    }
+
+    // Axes through origin.
+    this.frame.xAxis.setAttribute("x1", cx - this._half);
+    this.frame.xAxis.setAttribute("x2", cx + this._half);
+    this.frame.xAxis.setAttribute("y1", cy);
+    this.frame.xAxis.setAttribute("y2", cy);
+    this.frame.yAxis.setAttribute("x1", cx);
+    this.frame.yAxis.setAttribute("x2", cx);
+    this.frame.yAxis.setAttribute("y1", cy - this._half);
+    this.frame.yAxis.setAttribute("y2", cy + this._half);
+
+    // Legend layout: anchored to the top-right of the plot box. Three rows,
+    // each a 22-pixel arrow stub + 6-pixel gap + label.
+    const legendX = cx + this._half - 80;
+    const legendY = cy - this._half + 8;
+    const rowH = 18;
+    const stubW = 22;
+    const order = ["sig", "mom", "raw"];
+    for (let i = 0; i < order.length; i++) {
+      const item = this.legend.items[order[i]];
+      const yc = legendY + i * rowH + 9;
+      item.stub.setAttribute("x1", legendX);
+      item.stub.setAttribute("x2", legendX + stubW);
+      item.stub.setAttribute("y1", yc);
+      item.stub.setAttribute("y2", yc);
+      item.text.setAttribute("x", legendX + stubW + 6);
+      item.text.setAttribute("y", yc + 4);
+    }
+  }
+
+  handleResize() {
+    this.measureDims();
+    this.chartSVG.setAttribute("viewBox", `0 0 ${this._dims.W} ${this._dims.H}`);
+    this.layoutAxes();
+    this.requestRender(true);
+  }
+
+  // ============ Lerp helpers ============
+  lerpScalarGrid(arr, idx) {
+    const lo = Math.floor(idx);
+    const hi = Math.min(lo + 1, arr.length - 1);
+    const t = Math.max(0, Math.min(1, idx - lo));
+    return arr[lo] + t * (arr[hi] - arr[lo]);
+  }
+
+  lerpVec1D(arr2D, idx) {
+    // arr2D shape [n][D]; returns interpolated length-D vector.
+    const lo = Math.floor(idx);
+    const hi = Math.min(lo + 1, arr2D.length - 1);
+    const t = Math.max(0, Math.min(1, idx - lo));
+    const a = arr2D[lo], b = arr2D[hi];
+    return a.map((v, i) => v + t * (b[i] - v));
+  }
+
+  lerpVec2D(arr3D, sigmaIdx, betaIdx) {
+    // arr3D shape [n_sigma][n_beta][D]; returns interpolated length-D vector.
+    const sLo = Math.floor(sigmaIdx);
+    const sHi = Math.min(sLo + 1, arr3D.length - 1);
+    const sT = Math.max(0, Math.min(1, sigmaIdx - sLo));
+    const bLo = Math.floor(betaIdx);
+    const bHi = Math.min(bLo + 1, arr3D[0].length - 1);
+    const bT = Math.max(0, Math.min(1, betaIdx - bLo));
+    const a = arr3D[sLo][bLo];
+    const b = arr3D[sLo][bHi];
+    const c = arr3D[sHi][bLo];
+    const d = arr3D[sHi][bHi];
+    return a.map((_, i) => {
+      const ab = a[i] + bT * (b[i] - a[i]);
+      const cd = c[i] + bT * (d[i] - c[i]);
+      return ab + sT * (cd - ab);
+    });
+  }
+
+  lerpScalar2D(arr2D, sigmaIdx, betaIdx) {
+    const sLo = Math.floor(sigmaIdx);
+    const sHi = Math.min(sLo + 1, arr2D.length - 1);
+    const sT = Math.max(0, Math.min(1, sigmaIdx - sLo));
+    const bLo = Math.floor(betaIdx);
+    const bHi = Math.min(bLo + 1, arr2D[0].length - 1);
+    const bT = Math.max(0, Math.min(1, betaIdx - bLo));
+    const ab = arr2D[sLo][bLo] + bT * (arr2D[sLo][bHi] - arr2D[sLo][bLo]);
+    const cd = arr2D[sHi][bLo] + bT * (arr2D[sHi][bHi] - arr2D[sHi][bLo]);
+    return ab + sT * (cd - ab);
+  }
+
+  // ============ Render ============
+  requestRender(force = false) {
+    if (this._rafQueued && !force) return;
+    this._rafQueued = true;
+    if (force) {
+      this._rafQueued = false;
+      // Force-render: rebuild axes too (rank may have changed).
+      if (this._lastRank !== this.state.rank) {
+        this.layoutAxes();
+        this._lastRank = this.state.rank;
+      }
+      this.render();
+      return;
+    }
+    requestAnimationFrame(() => {
+      this._rafQueued = false;
+      this.render();
+    });
+  }
+
+  render() {
+    const { rank, sigmaIdx, betaIdx } = this.state;
+    const d = this.data[String(rank)];
+    const beta = this.lerpScalarGrid(this.meta.beta_grid, betaIdx);
+    const sigma = this.lerpScalarGrid(this.meta.sigma_grid, sigmaIdx);
+    const strengths = this.meta.strengths[String(rank)];
+
+    const sigP = d.signal_proj;
+    const rawP = this.lerpVec1D(d.raw_proj, sigmaIdx);
+    const momP = this.lerpVec2D(d.mom_proj, sigmaIdx, betaIdx);
+
+    // -- text bindings --
+    this.bind["beta-val"].textContent = beta < 0.1 ? beta.toFixed(2) : beta.toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+    this.bind["sigma-val"].textContent = sigma.toFixed(2);
+    this.bind["snr-val"].textContent = sigma > 1e-6 ? (strengths[0] / sigma).toFixed(1) : "∞";
+    const T = 1 / Math.max(1 - beta, 1e-4);
+    this.bind["window-text"].textContent = `T = ${T < 100 ? T.toFixed(1) : Math.round(T)}`;
+
+    const allInt = strengths.every(s => Number.isInteger(s));
+    const fmt = (s) => allInt ? s.toFixed(0) : s.toFixed(1);
+    const strengthStr = strengths.length <= 6
+      ? strengths.map(fmt).join(", ")
+      : `${fmt(strengths[0])}, ${fmt(strengths[1])}, …, ${fmt(strengths[strengths.length-2])}, ${fmt(strengths[strengths.length-1])}`;
+    this.bind["strength-text"].textContent = `strengths [${strengthStr}]`;
+
+    // In-plane cosines (matches what the user sees in the projection).
+    const cosInPlane = (a, b) => {
+      const na = Math.hypot(a[0], a[1]);
+      const nb = Math.hypot(b[0], b[1]);
+      if (na < 1e-9 || nb < 1e-9) return 0;
+      return (a[0]*b[0] + a[1]*b[1]) / (na * nb);
+    };
+    this.bind["mom-cos"].textContent = cosInPlane(momP, sigP).toFixed(3);
+    this.bind["raw-cos"].textContent = cosInPlane(rawP, sigP).toFixed(3);
+    const magSig = Math.hypot(sigP[0], sigP[1]);
+    const magMom = Math.hypot(momP[0], momP[1]);
+    this.bind["mom-mag"].textContent = magSig > 1e-9 ? (magMom / magSig).toFixed(3) : "—";
+
+    // -- chart --
+    const cx = this._cx, cy = this._cy, s = this._scale;
+    const sigR = this.rotate(sigP);
+    const rawR = this.rotate(rawP);
+    const momR = this.rotate(momP);
+    const setArrow = (line, vec) => {
+      line.setAttribute("x1", cx);
+      line.setAttribute("y1", cy);
+      line.setAttribute("x2", cx + vec[0] * s);
+      line.setAttribute("y2", cy - vec[1] * s);
+    };
+    setArrow(this.arrows.raw, rawR);
+    setArrow(this.arrows.sig, sigR);
+    setArrow(this.arrows.mom, momR);
+  }
 }
 
 
@@ -707,4 +1172,23 @@ async function bootWidget() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", bootWidget);
+async function bootAlignmentWidget() {
+  const container = document.getElementById("alignment-widget");
+  if (!container) return;
+  try {
+    container.classList.add("loading");
+    const resp = await fetch("data/proj.json");
+    if (!resp.ok) throw new Error(`proj.json fetch failed: ${resp.status}`);
+    const payload = await resp.json();
+    new AlignmentWidget(container, payload);
+  } catch (err) {
+    container.classList.remove("loading");
+    container.innerHTML = `<div class="widget-error">Could not load alignment data (${err.message}). Run <code>python widget/denoise-ortho/code/widget_precompute_proj.py</code> and serve via <code>python -m http.server</code>.</div>`;
+    console.error(err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  bootWidget();
+  bootAlignmentWidget();
+});

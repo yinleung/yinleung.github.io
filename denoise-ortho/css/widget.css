@@ -1,11 +1,13 @@
 /* === Spectral Filtering Widget === */
 
 .widget-root {
-  border-radius: 16px;
-  background: #ffffff;
-  border: 1px solid #e5e7eb;
+  position: relative;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #fdfaf3, #ffffff);
+  border: 1px solid #e6dfd1;
+  border-left: 3px solid #1d3557;
   padding: 28px clamp(20px, 4vw, 36px) 24px;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 1px 2px rgba(28, 31, 40, 0.04);
   margin-bottom: 28px;
 }
 
@@ -33,29 +35,32 @@
 
 .widget-eyebrow {
   font-size: 11.5px;
-  letter-spacing: 0.16em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #2563eb;
-  font-weight: 600;
-  margin-bottom: 4px;
+  color: #1d3557;
+  font-weight: 700;
+  margin-bottom: 6px;
 }
 .widget-headline {
-  font-size: 20px;
-  font-weight: 600;
-  color: #0f172a;
+  font-family: "Newsreader", "Source Serif Pro", Georgia, serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: #1a1d24;
   letter-spacing: -0.005em;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 .widget-headline .kbd {
   font-family: "JetBrains Mono", "SF Mono", monospace;
-  background: #eef2ff;
-  color: #312e81;
-  padding: 1px 8px;
+  background: #d6e0ec;
+  color: #1d3557;
+  padding: 1px 9px;
   border-radius: 5px;
   font-size: 17px;
+  border: 1px solid #b5c7da;
+  font-weight: 600;
 }
 .widget-sub {
-  margin-top: 6px;
+  margin-top: 8px;
   font-size: 14px;
   color: #475569;
   line-height: 1.55;
@@ -66,10 +71,12 @@
 .widget-sub .lg-mom,
 .widget-sub .lg-sig {
   font-weight: 600;
+  padding: 0 4px;
+  border-radius: 3px;
 }
-.widget-sub .lg-raw   { color: #6b7280; }
-.widget-sub .lg-mom   { color: #1d4ed8; }
-.widget-sub .lg-sig   { color: #111827; }
+.widget-sub .lg-raw   { color: #6b7280; background: #f1ede4; }
+.widget-sub .lg-mom   { color: #1d3557; background: #d6e0ec; }
+.widget-sub .lg-sig   { color: #7c2d3a; background: #f5e1e5; }
 
 .widget-charts {
   margin-top: 18px;
@@ -88,6 +95,54 @@
   height: 180px;
   display: block;
 }
+.alignment-chart {
+  width: 100%;
+  height: 380px;
+  display: block;
+}
+
+/* Arrow plot — three projection arrows from origin. */
+.arrow-line {
+  fill: none;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.arrow-line.raw {
+  stroke: #6b7280;
+  stroke-width: 1.6;
+  stroke-dasharray: 5 4;
+}
+.arrow-line.sig {
+  stroke: #7c2d3a;
+  stroke-width: 2.4;
+}
+.arrow-line.mom {
+  stroke: #1d3557;
+  stroke-width: 2.6;
+}
+.arrow-frame line {
+  stroke: #cbd5e1;
+  stroke-width: 1;
+}
+.arrow-frame line.axis {
+  stroke: #64748b;
+  stroke-width: 1.2;
+}
+.arrow-frame text {
+  font-size: 10.5px;
+  fill: #94a3b8;
+  font-family: "JetBrains Mono", monospace;
+}
+.widget-charts text.arrow-label {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: "JetBrains Mono", "SF Mono", monospace;
+}
+.widget-charts text.arrow-label.raw { fill: #4b5563; }
+.widget-charts text.arrow-label.sig { fill: #7c2d3a; }
+.widget-charts text.arrow-label.mom { fill: #1d3557; }
+
+.arrow-legend line { fill: none; }
 
 .widget-charts text.axis-label {
   font-size: 11px;
@@ -102,7 +157,7 @@
 .widget-charts text.band-label,
 .widget-charts text.ratio-title {
   font-size: 11px;
-  fill: #1e3a8a;
+  fill: #142647;
   font-style: italic;
 }
 .widget-charts text.ratio-title {
@@ -146,7 +201,7 @@
 .lab-val {
   font-family: "JetBrains Mono", "SF Mono", monospace;
   font-size: 14px;
-  color: #1d4ed8;
+  color: #1d3557;
   font-weight: 600;
   min-width: 60px;
   text-align: right;
@@ -168,9 +223,9 @@
   appearance: none;
   width: 18px; height: 18px;
   border-radius: 50%;
-  background: #1d4ed8;
+  background: #1d3557;
   border: 2.5px solid #ffffff;
-  box-shadow: 0 1px 3px rgba(29, 78, 216, 0.35), 0 0 0 1px #c7d2fe;
+  box-shadow: 0 1px 3px rgba(29, 53, 87, 0.35), 0 0 0 1px #b5c7da;
   cursor: grab;
   transition: transform 0.12s ease;
 }
@@ -181,9 +236,9 @@
 .slider::-moz-range-thumb {
   width: 18px; height: 18px;
   border-radius: 50%;
-  background: #1d4ed8;
+  background: #1d3557;
   border: 2.5px solid #ffffff;
-  box-shadow: 0 1px 3px rgba(29, 78, 216, 0.35), 0 0 0 1px #c7d2fe;
+  box-shadow: 0 1px 3px rgba(29, 53, 87, 0.35), 0 0 0 1px #b5c7da;
   cursor: grab;
 }
 
@@ -226,11 +281,11 @@
   transition: all 0.15s ease;
   font-weight: 500;
 }
-.pill:hover { color: #1d4ed8; }
+.pill:hover { color: #1d3557; }
 .pill.active {
   background: #ffffff;
-  color: #1d4ed8;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+  color: #1d3557;
+  box-shadow: 0 1px 2px rgba(28, 31, 40, 0.08);
 }
 
 .spacer { flex: 1; }
@@ -248,7 +303,7 @@
 }
 .rank-note {
   font-size: 12.5px;
-  color: #312e81;
+  color: #142647;
   font-family: "Inter", sans-serif;
   font-style: italic;
 }
