@@ -125,7 +125,7 @@ class SpectrumWidget {
     labelDiv.innerHTML =
       `<div class="widget-eyebrow">Widget 1 · Spectral Filtering</div>
        <div class="widget-headline">Singular spectra of the raw gradient, momentum, and true gradient signal.</div>
-       <div class="widget-sub">Synthetic rank-<em>r</em> spiked-MDS gradient stream. Three curves: <span class="lg-raw">raw G<sub>K</sub></span>, <span class="lg-sig">true gradient G<sup>sig</sup></span>, <span class="lg-mom">momentum M<sub>K</sub></span>.</div>`;
+       <div class="widget-sub">Synthetic rank-<em>r</em> spiked-BVMZOS gradient stream. Three curves: <span class="lg-raw">raw G<sub>K</sub></span>, <span class="lg-sig">true gradient G<sup>sig</sup></span>, <span class="lg-mom">momentum M<sub>K</sub></span>.</div>`;
     this.container.appendChild(labelDiv);
 
     const charts = document.createElement("div");
