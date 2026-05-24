@@ -143,15 +143,14 @@ window.MathJax = {
   <h2>Result&nbsp;1 · Momentum opens a spectral gap</h2>
 
   <p>
-    Decompose the gradient as a coherent rank-$r$ signal plus a martingale-difference perturbation,
-    $G_t = G_t^{\text{sig}} + \Xi_t$, with bounded variance $\mathbb{E}\|\Xi_t\|_F^2 \le \eta$. Let $T = 1/(1-\beta)$ be the effective momentum window size. Then the momentum buffer $M_t$ both <em>preserves</em> the coherent signal singular values and <em>attenuates</em> the perturbation tail.
+    Decompose the gradient as a coherent rank-$r$ signal plus a bounded variance mean-zero orthogonal (BVMZOS) perturbation, $G_t = G_t^{\text{sig}} + \Xi_t$, with bounded variance $\mathbb{E}\|\Xi_t\|_F^2 \le \eta$. Let $T = 1/(1-\beta)$ be the effective momentum window size. Then the momentum buffer $M_t$ both <em>preserves</em> the coherent signal singular values and <em>attenuates</em> the perturbation tail.
   </p>
 
   <div class="card theorem">
     <div class="thm-tag">Theorem 1</div>
     <p class="thm-name">Spectral gap of the momentum buffer.</p>
     <p class="thm-body">
-      Under Assumptions&nbsp;1 and&nbsp;2, with probability at least $1 - (2T-1)^{-1/2}$,
+      Under Assumptions&nbsp;1 and&nbsp;2, for $m \ge n$, with probability at least $1 - (2T-1)^{-1/2}$,
       $$
         \begin{aligned}
         \sigma_k(M_t) &\;\ge\; c_{\text{sig}}\lambda_k \;-\; \frac{\sqrt{\eta}}{(2T-1)^{1/4}}, \quad k = 1,\ldots,r, \\[2pt]
@@ -162,13 +161,13 @@ window.MathJax = {
   </div>
 
   <p style="margin-top: 18px;">
-    The spectral gap of Theorem 1 on a synthetic rank-$r$ spiked-MDS gradient stream (paper Figure 7). As $\beta$ rises, the momentum spectrum (blue) converges to the signal $G^{\text{sig}}$ (amber diamonds) at the head, while the noise tail is attenuated.
+    The spectral gap of Theorem 1 on a synthetic rank-$r$ spiked-BVMZOS gradient stream (paper Figure 7). As $\beta$ rises, the momentum spectrum (blue) converges to the signal $G^{\text{sig}}$ (amber diamonds) at the head, while the noise tail is attenuated.
   </p>
 
   <div id="widget" class="loading">Loading figure…</div>
 
   <p class="subtle">
-    Synthetic generator: rank-$r$ true gradient $G^{\text{sig}} \in \mathbb{R}^{100\times 100}$ plus an ARCH(1)-style martingale-difference perturbation $\Xi_t$ at scale $\sigma$, gradient buffer $K = 1000$, both panels averaged over 10 trials. β is capped at $0.995$ so the buffer is in its post-transient regime (Assumption&nbsp;2). At the $(r{=}3,\,\sigma{=}1,\,\beta{\le}0.99)$ reference grid, numerics match the paper's Figure&nbsp;7 to within trial variance.
+    Synthetic generator: rank-$r$ true gradient $G^{\text{sig}} \in \mathbb{R}^{100\times 100}$ plus an ARCH(1)-style BVMZOS perturbation $\Xi_t$ at scale $\sigma$, gradient buffer $K = 1000$, both panels averaged over 10 trials. β is capped at $0.995$ so the buffer is in its post-transient regime (Assumption&nbsp;2). At the $(r{=}3,\,\sigma{=}1,\,\beta{\le}0.99)$ reference grid, numerics match the paper's Figure&nbsp;7 to within trial variance.
   </p>
 
   <p>
@@ -201,8 +200,8 @@ window.MathJax = {
       Under the same conditions as Theorem 1, with probability at least $1 - (2T-1)^{-1/2}$,
       $$
         \begin{aligned}
-        \|\sin\Theta(\hat U_t, U)\|_2 &\;\le\; \frac{\sqrt{\eta}/(2T-1)^{1/4}}{c_{\text{sig}}\lambda_k - \sqrt{\eta}/(2T-1)^{1/4}} \;=\; O(T^{-1/4}), \\[2pt]
-        \|\sin\Theta(\hat V_t, V)\|_2 &\;\le\; \frac{\sqrt{\eta}/(2T-1)^{1/4}}{c_{\text{sig}}\lambda_k - \sqrt{\eta}/(2T-1)^{1/4}} \;=\; O(T^{-1/4}),
+        \|\sin\Theta(\hat U_t, U)\|_2 &\;\le\; \frac{\sqrt{\eta}/(2T-1)^{1/4}}{c_{\text{sig}}\lambda_r - \sqrt{\eta}/(2T-1)^{1/4}} \;=\; O(T^{-1/4}), \\[2pt]
+        \|\sin\Theta(\hat V_t, V)\|_2 &\;\le\; \frac{\sqrt{\eta}/(2T-1)^{1/4}}{c_{\text{sig}}\lambda_r - \sqrt{\eta}/(2T-1)^{1/4}} \;=\; O(T^{-1/4}),
         \end{aligned}
       $$
       where $\hat U_t$, $\hat V_t$ are the top-$r$ left and right singular subspaces of $M_t$, and $U = [u_1, \ldots, u_r]$, $V = [v_1, \ldots, v_r]$ those of the signal $G_t^{\text{sig}}$.
@@ -260,7 +259,7 @@ window.MathJax = {
   <div id="alignment-widget" class="loading">Loading figure…</div>
 
   <p class="subtle">
-    Synthetic generator: rank-$r$ true gradient $G^{\text{sig}} \in \mathbb{R}^{100\times 100}$ plus an ARCH(1)-style martingale-difference perturbation $\Xi_t$ at scale $\sigma$, gradient buffer $K = 1000$, single-trial trajectory, β capped at $0.995$. The three $m\!\times\!n$ matrices are projected onto a fixed 2-D plane (top-2 signal SVD directions for $r \ge 2$; signal direction plus an orthogonal companion for $r = 1$). The cosine and length-ratio readouts are computed in this plane.
+    Synthetic generator: rank-$r$ true gradient $G^{\text{sig}} \in \mathbb{R}^{100\times 100}$ plus an ARCH(1)-style BVMZOS perturbation $\Xi_t$ at scale $\sigma$, gradient buffer $K = 1000$, single-trial trajectory, β capped at $0.995$. The three $m\!\times\!n$ matrices are projected onto a fixed 2-D plane (top-2 signal SVD directions for $r \ge 2$; signal direction plus an orthogonal companion for $r = 1$). The cosine and length-ratio readouts are computed in this plane.
   </p>
 
   <p>The empirical comparison closely tracks the theory: Pre-polar's signal alignment grows with $\beta$ and dominates both other pipelines, while Polar-only is by construction $\beta$-independent. The next figures show the same effect on real NanoGPT gradients.</p>
@@ -305,7 +304,7 @@ window.MathJax = {
   </div>
 
   <p class="subtle">
-    Ablations across additional NanoGPT attention/MLP projection layers and training checkpoints, CIFAR-10 stationary and trajectory probes, and synthetic ARCH-MDS perturbation variants reproduce the same head-versus-tail spectral gap and Pre-polar's dominance over both other pipelines. See the appendix of the paper for the full grid and per-cell variance.
+    Ablations across additional NanoGPT attention/MLP projection layers and training checkpoints, CIFAR-10 stationary and trajectory probes, and synthetic ARCH-BVMZOS perturbation variants reproduce the same head-versus-tail spectral gap and Pre-polar's dominance over both other pipelines. See the appendix of the paper for the full grid and per-cell variance.
   </p>
 </section>
 
