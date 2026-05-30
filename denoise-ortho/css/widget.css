@@ -2,13 +2,12 @@
 
 .widget-root {
   position: relative;
-  border-radius: 12px;
-  background: linear-gradient(180deg, #fdfaf3, #ffffff);
-  border: 1px solid #e6dfd1;
+  border-radius: 0 8px 8px 0;
+  background: #ffffff;
   border-left: 3px solid #1d3557;
-  padding: 28px clamp(20px, 4vw, 36px) 24px;
-  box-shadow: 0 1px 2px rgba(28, 31, 40, 0.04);
-  margin-bottom: 28px;
+  padding: 24px clamp(18px, 3vw, 28px) 22px;
+  margin: 18px auto 28px;
+  max-width: 760px;
 }
 
 .widget-root.loading {

@@ -32,7 +32,7 @@
 html, body { margin: 0; padding: 0; }
 body {
   font-family: var(--sans);
-  font-size: 16px;
+  font-size: 17px;
   line-height: 1.65;
   color: var(--ink);
   background: var(--bg);
@@ -73,50 +73,66 @@ strong { color: var(--ink); }
 }
 .lead strong { font-weight: 600; color: var(--ink); }
 
-/* === Header === */
+/* === Header === Pion-style centered hero block, navy/cream palette. */
 .page-head {
-  padding: 56px 0 12px;
+  padding: 72px 0 40px;
+  text-align: center;
+  border-bottom: 1px solid var(--rule-soft);
   position: relative;
 }
+
+/* Pill eyebrow */
 .page-head .eyebrow {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 13px;
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: 12px;
   font-weight: 500;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 22px;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin: 0 0 24px;
 }
-.page-head .eyebrow::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--rule-soft);
-}
+
+/* Title */
 .page-head .title {
-  font-size: clamp(30px, 4.2vw, 46px);
-  font-weight: 500;
-  line-height: 1.12;
-  letter-spacing: -0.02em;
   font-family: var(--serif);
-  margin-bottom: 28px;
+  font-size: clamp(30px, 4.6vw, 46px);
+  font-weight: 600;
+  line-height: 1.18;
+  letter-spacing: -0.015em;
+  margin: 0 auto 8px;
+  max-width: 880px;
   color: var(--ink);
 }
 .page-head .title em { font-style: italic; color: var(--accent); }
 
-/* Author row — names with raised superscript marks (real <sup>, not flex baseline) */
-.authors {
-  font-size: 16px;
+/* Subtitle */
+.page-head .subtitle {
+  font-family: var(--serif);
+  font-size: clamp(17px, 2.1vw, 21px);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.45;
   color: var(--ink-soft);
-  display: block;
-  margin-bottom: 10px;
-  line-height: 1.9;
+  margin: 12px auto 0;
+  max-width: 720px;
+}
+
+/* Authors — comma-separated inline, centered, serif for publication feel */
+.authors {
+  font-family: var(--serif);
+  font-size: 17px;
+  line-height: 1.8;
+  color: var(--ink);
+  margin: 32px auto 4px;
+  max-width: 800px;
+  text-align: center;
 }
 .author {
   display: inline;
-  margin-right: 22px;
   white-space: nowrap;
 }
 .author .name {
@@ -146,41 +162,49 @@ strong { color: var(--ink); }
   line-height: 0;
 }
 
-/* Affiliations: clean inline list with small numeric badges */
+/* Affiliations — one centered line, middle-dot separated */
 .affs {
   list-style: none;
   padding: 0;
-  margin: 0 0 14px;
-  font-size: 13px;
+  margin: 8px auto 0;
+  font-family: var(--sans);
+  font-size: 14px;
   color: var(--muted);
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: 22px;
-  row-gap: 4px;
-  line-height: 1.55;
+  line-height: 1.6;
+  text-align: center;
+  max-width: 820px;
 }
 .affs li {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 5px;
+  display: inline;
+  padding: 0;
+}
+.affs li:not(:last-child)::after {
+  content: " · ";
+  color: var(--muted);
+  margin: 0 0.15em;
 }
 .affs .aff-num {
-  font-size: 10.5px;
-  color: var(--muted);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  min-width: 9px;
-  text-align: right;
+  font-size: 0.78em;
+  vertical-align: 0.35em;
+  line-height: 0;
+  margin-right: 0.15em;
+  font-weight: 600;
 }
 
+/* Submission note — equal contribution / correspondence on one centered line */
 .aff-notes {
-  margin: 0 0 22px;
-  font-size: 12.5px;
+  margin: 14px auto 0;
+  font-family: var(--sans);
+  font-size: 13px;
   color: var(--muted);
-  display: flex;
-  flex-wrap: wrap;
-  column-gap: 18px;
-  row-gap: 3px;
+  letter-spacing: 0.02em;
+  text-align: center;
+  display: block;
+}
+.aff-notes span:not(:last-child)::after {
+  content: " · ";
+  color: var(--muted);
+  margin: 0 0.15em;
 }
 .aff-notes a {
   color: var(--ink-soft);
@@ -192,48 +216,57 @@ strong { color: var(--ink); }
   margin-right: 3px;
 }
 
-.action-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+/* Centered action row */
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  margin: 32px 0 4px;
+}
+/* Pill-shaped action buttons — Pion's primary/secondary hierarchy.
+   Primary uses --ink (near-black) so the navy accent stays reserved for
+   structural highlights (eyebrow, theorem cards, links). */
 .action {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 16px;
-  background: var(--bg-card);
-  color: var(--ink-soft);
-  border: 1px solid var(--rule);
-  border-radius: 8px;
-  font-size: 13.5px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0.005em;
-  border-bottom: 1px solid var(--rule);
-  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.12s;
+  background: var(--bg-card);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+  text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease,
+              transform 0.15s ease, box-shadow 0.15s ease;
 }
 .action:hover {
-  background: var(--warm-tint);
-  color: var(--warm-deep);
-  border-color: var(--warm-soft);
-  border-bottom-color: var(--warm-soft);
+  background: var(--bg-tint);
+  color: var(--ink);
+  border-color: var(--ink-soft);
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(28, 31, 40, 0.08);
 }
 .action.primary {
-  background: var(--accent);
+  background: var(--ink);
   color: #ffffff;
-  border-color: var(--accent);
+  border-color: var(--ink);
 }
 .action.primary:hover {
-  background: var(--accent-dark);
-  border-color: var(--accent-dark);
-  color: #fff;
-  border-bottom-color: var(--accent-dark);
+  background: #000;
+  border-color: #000;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
 }
-.action svg { width: 14px; height: 14px; }
+.action svg { width: 15px; height: 15px; }
 
-/* === Section dividers === */
-.divider {
-  height: 1px;
-  background: var(--rule);
-  margin: 56px 0;
-}
+/* === Section dividers ===
+   Explicit <div class="divider"> blocks are no longer used; section margin
+   alone separates sections. Kept as display:none for any stragglers. */
+.divider { display: none; }
 
 /* === Cards === */
 .card {
@@ -246,7 +279,7 @@ strong { color: var(--ink); }
 .card h3 { margin-top: 0; }
 .card.theorem {
   border-left: 3px solid var(--accent);
-  background: linear-gradient(180deg, #fdfaf3, #ffffff);
+  background: var(--bg-card);
 }
 .card.theorem h3 { color: var(--accent); font-family: var(--sans); font-size: 14px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 4px; }
 .card.theorem .thm-tag {
@@ -274,7 +307,7 @@ strong { color: var(--ink); }
 
 .card.assumption {
   border-left: 3px solid var(--teal);
-  background: linear-gradient(180deg, #f6fcfa, #ffffff);
+  background: var(--bg-card);
   font-size: 14.5px;
 }
 .card.assumption .ass-tag {
@@ -352,16 +385,14 @@ strong { color: var(--ink); }
 
 .tldr-banner {
   position: relative;
-  background: linear-gradient(180deg, #fdfaf3, #ffffff);
-  border: 1px solid var(--rule);
+  background: var(--bg-tint);
   border-left: 3px solid var(--accent);
   padding: 22px clamp(18px, 3vw, 28px);
-  border-radius: 12px;
+  border-radius: 0 8px 8px 0;
   font-size: 16px;
   color: var(--ink-soft);
   line-height: 1.6;
   margin: 18px 0 30px;
-  box-shadow: 0 1px 2px rgba(28, 31, 40, 0.04);
 }
 .tldr-banner > strong:first-child {
   display: inline-block;
@@ -447,6 +478,15 @@ strong { color: var(--ink); }
 }
 .figure figcaption strong { color: var(--ink-soft); }
 
+/* Per-figure width caps. Apply on the <img> inside .figure to override the
+   default 100% cell-fill. Mapped to representative paper-page widths so a
+   small figure stays small and the page rhythm doesn't feel uniformly loud. */
+.figure img.fw-720 { max-width: 720px; }
+.figure img.fw-560 { max-width: 560px; }
+.figure img.fw-440 { max-width: 440px; }
+.figure img.fw-360 { max-width: 360px; }
+.figure img.fw-260 { max-width: 260px; }
+
 /* Two-up grid for pairs of single-panel figures. Each cell takes a
    uniform share so per-panel size matches across the page. */
 .fig-grid-2 {
@@ -457,6 +497,10 @@ strong { color: var(--ink); }
   max-width: 920px;
   align-items: start;
 }
+/* Narrower variant for pairs of square-ish (≈1.25:1) plots that otherwise
+   read as too tall when each cell is ~450px wide. */
+.fig-grid-2.narrow { max-width: 760px; }
+.fig-grid-2.medium { max-width: 840px; }
 .fig-grid-2 .figure {
   margin: 0;
   max-width: none;

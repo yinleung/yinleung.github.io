@@ -24,14 +24,13 @@ window.MathJax = {
 
 <header class="page-head">
   <div class="eyebrow">Momentum Filtering</div>
-  <h1 class="title">Denoise First, Orthogonalize Later<br>
-    <span style="font-family: 'Source Serif Pro', Georgia, serif; font-size:0.7em; color: var(--ink-soft); font-weight: 500; font-style: italic;">Understanding Momentum in Muon via Spectral Filtering</span>
-  </h1>
+  <h1 class="title">Denoise First, Orthogonalize Later</h1>
+  <p class="subtitle">Understanding Momentum in Muon via Spectral Filtering</p>
 
   <div class="authors">
-    <span class="author"><a class="name" href="https://yinleung.com/" target="_blank" rel="noopener">Xianliang Li</a><sup class="aff-mark">1,2,&#9733;</sup></span>
-    <span class="author"><a class="name" href="https://z-z1han.github.io/" target="_blank" rel="noopener">Zihan Zhang</a><sup class="aff-mark">3,2,&#9733;</sup></span>
-    <span class="author"><a class="name" href="https://wyliu.com/" target="_blank" rel="noopener">Weiyang Liu</a><sup class="aff-mark">4</sup></span>
+    <span class="author"><a class="name" href="https://yinleung.com/" target="_blank" rel="noopener">Xianliang Li</a><sup class="aff-mark">1,2,&#9733;</sup></span>,
+    <span class="author"><a class="name" href="https://z-z1han.github.io/" target="_blank" rel="noopener">Zihan Zhang</a><sup class="aff-mark">3,2,&#9733;</sup></span>,
+    <span class="author"><a class="name" href="https://wyliu.com/" target="_blank" rel="noopener">Weiyang Liu</a><sup class="aff-mark">4</sup></span>,
     <span class="author"><a class="name" href="https://hermite.jp/" target="_blank" rel="noopener">Han Bao</a><sup class="aff-mark">1,2,5,6,&#9993;</sup></span>
   </div>
   <ol class="affs">
@@ -71,7 +70,6 @@ window.MathJax = {
 </section>
 
 
-<div class="divider"></div>
 
 
 <!-- ================= The pipeline question ================= -->
@@ -135,7 +133,6 @@ window.MathJax = {
 </section>
 
 
-<div class="divider"></div>
 
 
 <!-- ================= Result 1 — Theorem 1 + Cor 1 ================= -->
@@ -174,7 +171,7 @@ window.MathJax = {
     This is the opposite of the convergence-rate story in prior Muon analyses, which deteriorate with heavy momentum. The next figures show the same effect on real NanoGPT gradients.
   </p>
 
-  <div class="fig-grid-2">
+  <div class="fig-grid-2 narrow">
     <figure class="figure">
       <img src="assets/fig_filtering_frozen_spectrum.png" alt="Filtered singular value spectra on NanoGPT">
       <figcaption><strong>Filtered singular-value spectra on NanoGPT</strong> at <code>h.0.attn.c_proj</code>, step 3000. As β rises, the momentum spectrum (blue) descends toward the mean-gradient spectrum (orange dashed) — head first, tail later.</figcaption>
@@ -228,7 +225,6 @@ window.MathJax = {
 </section>
 
 
-<div class="divider"></div>
 
 
 <!-- ================= Result 2 — Theorem 2 + 3 ================= -->
@@ -264,7 +260,7 @@ window.MathJax = {
 
   <p>The empirical comparison closely tracks the theory: Pre-polar's signal alignment grows with $\beta$ and dominates both other pipelines, while Polar-only is by construction $\beta$-independent. The next figures show the same effect on real NanoGPT gradients.</p>
 
-  <div class="fig-grid-2">
+  <div class="fig-grid-2 narrow">
     <figure class="figure">
       <img src="assets/fig_ordering_frozen_beta.png" alt="Pipeline alignment vs beta on NanoGPT">
       <figcaption><strong>Stationary $\beta$-sweep probe at NanoGPT step 3000.</strong> Pre-polar climbs monotonically with $\beta$; Post-polar is essentially flat; Polar-only is constant.</figcaption>
@@ -279,7 +275,7 @@ window.MathJax = {
   <p>
     Same trajectory probe as in Result 1: a $K$-step sliding gradient buffer alongside live NanoGPT training. The model weights — and the signal subspace — drift step-by-step.
   </p>
-  <div class="fig-grid-2">
+  <div class="fig-grid-2 narrow">
     <figure class="figure">
       <img src="assets/fig_online_ordering_beta.png" alt="Trajectory pipeline alignment vs beta">
       <figcaption><strong>Trajectory $\beta$-sweep probe at step 3000.</strong> Pre-polar still climbs with $\beta$; Post-polar and Polar-only stay flat. Theorem 2's noncommutativity is robust to non-stationary signal.</figcaption>
@@ -309,7 +305,6 @@ window.MathJax = {
 </section>
 
 
-<div class="divider"></div>
 
 
 <!-- ================= Takeaway ================= -->
