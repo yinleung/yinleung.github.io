@@ -67,7 +67,7 @@ window.MathJax = {
 </header>
 
 <!-- ================= TL;DR ================= -->
-<section>
+<section id="tldr">
   <div class="tldr-banner">
     <strong>TL;DR.</strong> Muon shows strong empirical performance in LLM training, but the theoretical role of momentum remains unclear. We show that momentum in Muon acts as a <em>spectral filter</em>: under a signal-plus-perturbation gradient model, it suppresses perturbations while preserving the dominant gradient signal, enlarging the spectral gap between them and stabilizing the singular subspaces passed to Muon's orthogonalization step. Applying momentum before orthogonalization achieves <em>provably stronger</em> signal alignment than reversing the order or removing momentum — hence the rule: <strong>denoise first, then orthogonalize</strong>.
   </div>
@@ -77,7 +77,7 @@ window.MathJax = {
 
 
 <!-- ================= The pipeline question ================= -->
-<section>
+<section id="question">
   <h2>The question Muon raises</h2>
 
   <p>
@@ -312,7 +312,7 @@ window.MathJax = {
 
 
 <!-- ================= Takeaway ================= -->
-<section>
+<section id="takeaways">
   <h2>Takeaways</h2>
   <ol>
     <li>
@@ -346,7 +346,7 @@ window.MathJax = {
     <li id="ref-li2025momentum">
       Li, X., Luo, J., Zheng, Z., Wang, H., Luo, L., Wen, L., Wu, L., Xu, S.
       <em>On the Performance Analysis of Momentum Method: A Frequency Domain Perspective.</em>
-      <a href="https://openreview.net/forum?id=tznvtmSEiN" target="_blank" rel="noopener">ICLR 2025</a>.
+      <a href="https://proceedings.iclr.cc/paper_files/paper/2025/hash/76c64372d25513fed60a9e4176a62481-Abstract-Conference.html" target="_blank" rel="noopener">ICLR 2025</a>.
     </li>
   </ol>
   <p class="subtle refs-note">A full bibliography is given in the paper.</p>
