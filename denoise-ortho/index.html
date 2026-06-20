@@ -299,7 +299,14 @@ window.MathJax = {
     <div class="thm-tag">Theorem 3</div>
     <p class="thm-name">Quantitative separation under the rank-1 spiked Gaussian model.</p>
     <p class="thm-body">
-      In the low-SNR regime $\lambda < 0.25\sigma_\Xi(\sqrt{m}-\sqrt{n})$, the Polar-only signal alignment becomes marginal as the matrix size grows relative to $\lambda$ — Polar-only loses the signal entirely. Pre-polar, in contrast, continues to recover the signal as long as the momentum window $T$ is large.
+      Under the rank-1 spiked Gaussian model — signal strength $\lambda$ and i.i.d. Gaussian perturbation with entrywise scale $\sigma_\Xi$ — assume $m > n$ and the low-SNR regime $\lambda < 0.25\,\sigma_\Xi(\sqrt{m}-\sqrt{n})$. Then the Polar-only signal alignment obeys
+      $$
+        \mathbb{E}\!\left[\frac{\langle \mathcal{O}(G_t),\, G^{\text{sig}}\rangle_F}{\langle \mathcal{O}(G^{\text{sig}}),\, G^{\text{sig}}\rangle_F}\right]
+        \;\le\;
+        \frac{1}{\sqrt{m}} \;+\; \frac{4\lambda}{\sigma_\Xi(\sqrt{m}-\sqrt{n})} \;+\; 4\sqrt{n}\,e^{-c(\sqrt{m}-\sqrt{n})^2/4}
+        \;\xrightarrow{\,m\to\infty\,}\; 0,
+      $$
+      for an absolute constant $c > 0$. The bound vanishes as the matrix size grows relative to $\lambda$, so the rank-1 signal is buried in the noise bulk and Polar-only loses it entirely. Pre-polar, in contrast, continues to recover the signal as long as the momentum window size $T$ is large (Theorem 2).
     </p>
   </div>
 
