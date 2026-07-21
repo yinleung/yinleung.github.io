@@ -1,0 +1,442 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="author" content="Xianliang Li">
+    <meta name="description" content="Blog posts by Xianliang Li (李賢亮) — research notes on optimizers and deep neural network training.">
+    <title>Blog · Xianliang Li</title>
+    <link rel="icon" type="image/png" href="../images/favicon.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        /* =========================================================
+           Theme tokens (shared with the homepage)
+           ========================================================= */
+        :root {
+            --bg:          #faf7f1;
+            --bg-card:     #ffffff;
+            --bg-subtle:   #f1ede4;
+            --text:        #1a1d24;
+            --text-soft:   #4b5260;
+            --text-muted:  #8a8f9a;
+            --accent:      #1d3557;
+            --accent-soft: #3d5a80;
+            --highlight:   #c97c2d;
+            --highlight-bg:#fbf1e2;
+            --border:      #e6dfd1;
+            --border-soft: #ece6d8;
+            --shadow-sm:   0 1px 2px rgba(28, 31, 40, 0.04);
+            --shadow:      0 1px 2px rgba(28, 31, 40, 0.04), 0 6px 18px rgba(28, 31, 40, 0.05);
+            --shadow-lift: 0 1px 2px rgba(28, 31, 40, 0.05), 0 12px 28px rgba(28, 31, 40, 0.08);
+            --radius:      14px;
+            --radius-sm:   10px;
+            --radius-pill: 999px;
+            --maxw:        880px;
+        }
+
+        [data-theme="dark"] {
+            --bg:          #131418;
+            --bg-card:     #1c1e24;
+            --bg-subtle:   #1f2129;
+            --text:        #ecead9;
+            --text-soft:   #b6b7b5;
+            --text-muted:  #777a82;
+            --accent:      #8db4d8;
+            --accent-soft: #a3c2dd;
+            --highlight:   #e2a25e;
+            --highlight-bg:#2c2519;
+            --border:      #2a2d36;
+            --border-soft: #23262e;
+            --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow:      0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 18px rgba(0, 0, 0, 0.35);
+            --shadow-lift: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 28px rgba(0, 0, 0, 0.45);
+        }
+
+        /* =========================================================
+           Base
+           ========================================================= */
+        *, *::before, *::after { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.65;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transition: background-color 0.25s ease, color 0.25s ease;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            border-bottom: 1px solid transparent;
+            transition: color 0.15s ease, border-color 0.15s ease;
+        }
+        a:hover {
+            color: var(--highlight);
+            border-bottom-color: currentColor;
+        }
+
+        ::selection { background: var(--highlight-bg); color: var(--text); }
+
+        /* =========================================================
+           Top nav
+           ========================================================= */
+        .nav {
+            position: sticky;
+            top: 14px;
+            z-index: 50;
+            margin: 14px auto 0;
+            max-width: var(--maxw);
+            padding: 0 24px;
+            display: flex;
+            justify-content: center;
+        }
+        .nav-inner {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px;
+            background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+            backdrop-filter: saturate(140%) blur(12px);
+            -webkit-backdrop-filter: saturate(140%) blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-pill);
+            box-shadow: var(--shadow-sm);
+        }
+        .nav a {
+            display: inline-flex;
+            align-items: center;
+            padding: 7px 14px;
+            color: var(--text-soft);
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            border-radius: var(--radius-pill);
+            border: none;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+        .nav a:hover {
+            background: var(--bg-subtle);
+            color: var(--text);
+        }
+        .nav a.active {
+            background: var(--accent);
+            color: #fff;
+        }
+        [data-theme="dark"] .nav a.active { color: #131418; }
+
+        .theme-toggle {
+            margin-left: 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: transparent;
+            color: var(--text-soft);
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+        .theme-toggle:hover { background: var(--bg-subtle); color: var(--text); }
+        .theme-toggle svg { width: 16px; height: 16px; }
+        .theme-toggle .icon-moon { display: none; }
+        [data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+        [data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+
+        /* =========================================================
+           Layout
+           ========================================================= */
+        main {
+            max-width: var(--maxw);
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        .section-title {
+            font-family: 'Newsreader', Georgia, serif;
+            font-weight: 500;
+            font-size: 30px;
+            line-height: 1.2;
+            margin: 36px 0 6px;
+            color: var(--text);
+            letter-spacing: -0.01em;
+        }
+        .section-rule {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+        .section-rule::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* =========================================================
+           Post list
+           ========================================================= */
+        .post-list {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .post {
+            display: block;
+            padding: 22px 24px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+        .post:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lift);
+            border-color: color-mix(in srgb, var(--accent) 25%, var(--border));
+        }
+
+        .post-meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+        .post-date {
+            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+            letter-spacing: 0.02em;
+        }
+        .post-tag {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--highlight);
+            background: var(--highlight-bg);
+            border-radius: var(--radius-pill);
+        }
+
+        .post-title {
+            font-family: 'Newsreader', Georgia, serif;
+            font-weight: 500;
+            font-size: 22px;
+            line-height: 1.3;
+            margin: 0 0 4px;
+            color: var(--text);
+        }
+        .post-title a { color: var(--text); border-bottom: none; }
+        .post-title a:hover { color: var(--highlight); }
+
+        .post-subtitle {
+            margin: 0 0 10px;
+            font-size: 15px;
+            font-style: italic;
+            color: var(--text-soft);
+            font-family: 'Newsreader', Georgia, serif;
+        }
+
+        .post-desc {
+            margin: 0 0 12px;
+            font-size: 14.5px;
+            line-height: 1.7;
+            color: var(--text-soft);
+        }
+
+        .post-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 10px;
+            font-size: 12.5px;
+            font-weight: 500;
+            color: var(--accent);
+            background: var(--bg-subtle);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-pill);
+            transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+        }
+        .chip:hover {
+            color: var(--highlight);
+            background: var(--highlight-bg);
+            border-color: var(--highlight);
+            border-bottom-color: var(--highlight);
+        }
+        .chip svg { width: 12px; height: 12px; flex-shrink: 0; opacity: 0.85; }
+        .chip:hover svg { opacity: 1; }
+
+        /* =========================================================
+           Footer
+           ========================================================= */
+        footer {
+            max-width: var(--maxw);
+            margin: 60px auto 0;
+            padding: 24px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12.5px;
+            color: var(--text-muted);
+        }
+        footer a { color: var(--text-muted); border-bottom: none; }
+        footer a:hover { color: var(--highlight); }
+
+        /* =========================================================
+           Animations
+           ========================================================= */
+        @media (prefers-reduced-motion: no-preference) {
+            .fade-in {
+                opacity: 0;
+                transform: translateY(8px);
+                animation: fadeIn 0.6s ease-out forwards;
+            }
+            .fade-in.d-1 { animation-delay: 0.05s; }
+        }
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* =========================================================
+           Responsive
+           ========================================================= */
+        @media (max-width: 720px) {
+            .nav-inner { gap: 0; padding: 4px; }
+            .nav a { padding: 6px 10px; font-size: 13px; }
+            main { padding: 24px 18px 60px; }
+            .section-title { font-size: 26px; }
+            .post { padding: 18px 20px; }
+            .post-title { font-size: 20px; }
+        }
+
+        @media (max-width: 440px) {
+            .nav { padding: 0 12px; }
+            .nav a { padding: 6px 8px; font-size: 12.5px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- =========================================================
+         SVG icon sprite (referenced by <use> in post chips)
+         ========================================================= -->
+    <svg xmlns="http://www.w3.org/2000/svg" width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true">
+        <defs>
+            <symbol id="icon-paper" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/>
+                <path d="M14 3v6h6"/>
+            </symbol>
+            <symbol id="icon-code" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="16 18 22 12 16 6"/>
+                <polyline points="8 6 2 12 8 18"/>
+            </symbol>
+        </defs>
+    </svg>
+
+    <!-- =========================================================
+         Sticky navigation
+         ========================================================= -->
+    <nav class="nav" aria-label="Primary">
+        <div class="nav-inner">
+            <a href="../#about">About</a>
+            <a href="../#research">Research</a>
+            <a href="../#service">Service</a>
+            <a href="./" class="active" aria-current="page">Blog</a>
+            <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Toggle dark mode">
+                <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4"/>
+                    <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+                </svg>
+                <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+        </div>
+    </nav>
+
+    <main>
+        <section class="fade-in">
+            <h1 class="section-title">Blog</h1>
+            <div class="section-rule">Posts</div>
+
+            <ul class="post-list">
+                <!-- =====================================================
+                     To add a new post, copy the <li class="post"> block
+                     below, put it at the TOP of this list (newest first),
+                     and update the date, tag, title, link, and description.
+                     ===================================================== -->
+                <li class="post fade-in d-1">
+                    <div class="post-meta">
+                        <span class="post-date">June 2026</span>
+                        <span class="post-tag">Momentum Filtering</span>
+                    </div>
+                    <h2 class="post-title">
+                        <a href="../denoise-ortho/">Denoise First, Orthogonalize Later</a>
+                    </h2>
+                    <p class="post-subtitle">Understanding Momentum in Muon via Spectral Filtering</p>
+                    <p class="post-desc">
+                        A theoretical and empirical study of why placing momentum before orthogonalization makes Muon work. Under a signal-plus-perturbation gradient model, momentum acts as a spectral filter that suppresses perturbations while preserving the dominant gradient signal — hence the rule: denoise first, then orthogonalize.
+                    </p>
+                    <div class="post-links">
+                        <a class="chip" href="https://arxiv.org/abs/2606.03899"><svg aria-hidden="true"><use href="#icon-paper"/></svg>arXiv</a>
+                        <a class="chip" href="https://github.com/yinleung/Denoise-Ortho"><svg aria-hidden="true"><use href="#icon-code"/></svg>Code</a>
+                    </div>
+                </li>
+            </ul>
+        </section>
+    </main>
+
+    <footer>
+        <span>© Xianliang Li 2026</span>
+        <a href="../">← Back to home</a>
+    </footer>
+
+    <script>
+        /* =====================================================
+           Theme toggle (shares the 'theme' key with the homepage,
+           so the choice persists across pages)
+           ===================================================== */
+        (function() {
+            const storageKey = 'theme';
+            const root = document.documentElement;
+            const stored = localStorage.getItem(storageKey);
+            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const initial = stored || (systemDark ? 'dark' : 'light');
+            root.setAttribute('data-theme', initial);
+
+            const toggle = document.getElementById('theme-toggle');
+            toggle.addEventListener('click', () => {
+                const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+                root.setAttribute('data-theme', next);
+                localStorage.setItem(storageKey, next);
+            });
+        })();
+    </script>
+</body>
+</html>
