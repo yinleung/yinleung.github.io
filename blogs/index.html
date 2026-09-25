@@ -7,51 +7,53 @@
     <meta name="description" content="Blog posts by Xianliang Li (李賢亮) — research notes on optimizers and deep neural network training.">
     <title>Blog · Xianliang Li</title>
     <link rel="icon" type="image/png" href="../images/favicon.ico">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Newsreader:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <script>
+        /* Apply the saved (or system) theme before first paint, so dark mode doesn't flash light */
+        (function() {
+            let theme = null;
+            try { theme = localStorage.getItem('theme'); } catch (e) {}
+            if (!theme) theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <style>
+        /* =========================================================
+           Fonts — Latin Modern (the LaTeX typeface), served by jsDelivr
+           ========================================================= */
+        @font-face { font-family: 'Latin Modern'; font-style: normal; font-weight: 400; font-display: swap; src: url('https://cdn.jsdelivr.net/npm/latex.css@1.14.0/fonts/LM-regular.woff2') format('woff2'); }
+        @font-face { font-family: 'Latin Modern'; font-style: italic; font-weight: 400; font-display: swap; src: url('https://cdn.jsdelivr.net/npm/latex.css@1.14.0/fonts/LM-italic.woff2') format('woff2'); }
+        @font-face { font-family: 'Latin Modern'; font-style: normal; font-weight: 700; font-display: swap; src: url('https://cdn.jsdelivr.net/npm/latex.css@1.14.0/fonts/LM-bold.woff2') format('woff2'); }
+        @font-face { font-family: 'Latin Modern'; font-style: italic; font-weight: 700; font-display: swap; src: url('https://cdn.jsdelivr.net/npm/latex.css@1.14.0/fonts/LM-bold-italic.woff2') format('woff2'); }
+
         /* =========================================================
            Theme tokens (shared with the homepage)
            ========================================================= */
         :root {
-            --bg:          #faf7f1;
-            --bg-card:     #ffffff;
-            --bg-subtle:   #f1ede4;
-            --text:        #1a1d24;
-            --text-soft:   #4b5260;
-            --text-muted:  #8a8f9a;
-            --accent:      #1d3557;
-            --accent-soft: #3d5a80;
-            --highlight:   #c97c2d;
-            --highlight-bg:#fbf1e2;
-            --border:      #e6dfd1;
-            --border-soft: #ece6d8;
-            --shadow-sm:   0 1px 2px rgba(28, 31, 40, 0.04);
-            --shadow:      0 1px 2px rgba(28, 31, 40, 0.04), 0 6px 18px rgba(28, 31, 40, 0.05);
-            --shadow-lift: 0 1px 2px rgba(28, 31, 40, 0.05), 0 12px 28px rgba(28, 31, 40, 0.08);
-            --radius:      14px;
-            --radius-sm:   10px;
-            --radius-pill: 999px;
-            --maxw:        880px;
+            --font-text:   'Latin Modern', Georgia, 'Times New Roman', serif;
+
+            --bg:          #fffefb;
+            --bg-subtle:   #f4f2ec;
+            --text:        #111111;
+            --text-soft:   #333333;
+            --text-muted:  #5f5f5f;
+            --accent:      #1a3fa0;
+            --accent-hover:#b00020;
+            --selection:   #f3ecd9;
+            --border:      #d9d6cf;
+            --maxw:        780px;
         }
 
         [data-theme="dark"] {
-            --bg:          #131418;
-            --bg-card:     #1c1e24;
-            --bg-subtle:   #1f2129;
-            --text:        #ecead9;
-            --text-soft:   #b6b7b5;
-            --text-muted:  #777a82;
-            --accent:      #8db4d8;
-            --accent-soft: #a3c2dd;
-            --highlight:   #e2a25e;
-            --highlight-bg:#2c2519;
-            --border:      #2a2d36;
-            --border-soft: #23262e;
-            --shadow-sm:   0 1px 2px rgba(0, 0, 0, 0.3);
-            --shadow:      0 1px 2px rgba(0, 0, 0, 0.3), 0 6px 18px rgba(0, 0, 0, 0.35);
-            --shadow-lift: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 28px rgba(0, 0, 0, 0.45);
+            --bg:          #1a1a1a;
+            --bg-subtle:   #262626;
+            --text:        #e8e6e1;
+            --text-soft:   #c9c6c0;
+            --text-muted:  #9a978f;
+            --accent:      #8fb0ff;
+            --accent-hover:#ff9e9e;
+            --selection:   #2b2a24;
+            --border:      #3a3935;
         }
 
         /* =========================================================
@@ -64,9 +66,9 @@
             padding: 0;
             background: var(--bg);
             color: var(--text);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-            font-size: 16px;
-            line-height: 1.65;
+            font-family: var(--font-text);
+            font-size: 18px;
+            line-height: 1.5;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             transition: background-color 0.25s ease, color 0.25s ease;
@@ -79,11 +81,11 @@
             transition: color 0.15s ease, border-color 0.15s ease;
         }
         a:hover {
-            color: var(--highlight);
+            color: var(--accent-hover);
             border-bottom-color: currentColor;
         }
 
-        ::selection { background: var(--highlight-bg); color: var(--text); }
+        ::selection { background: var(--selection); color: var(--text); }
 
         /* =========================================================
            Top nav
@@ -103,34 +105,26 @@
             align-items: center;
             gap: 4px;
             padding: 6px;
-            background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+            background: color-mix(in srgb, var(--bg) 92%, transparent);
             backdrop-filter: saturate(140%) blur(12px);
             -webkit-backdrop-filter: saturate(140%) blur(12px);
             border: 1px solid var(--border);
-            border-radius: var(--radius-pill);
-            box-shadow: var(--shadow-sm);
         }
         .nav a {
             display: inline-flex;
             align-items: center;
-            padding: 7px 14px;
+            padding: 5px 12px;
             color: var(--text-soft);
-            font-size: 14px;
-            font-weight: 500;
-            letter-spacing: 0.01em;
-            border-radius: var(--radius-pill);
+            font-size: 16px;
+            letter-spacing: 0.02em;
             border: none;
-            transition: background-color 0.15s ease, color 0.15s ease;
+            transition: color 0.15s ease, box-shadow 0.15s ease;
         }
-        .nav a:hover {
-            background: var(--bg-subtle);
-            color: var(--text);
-        }
+        .nav a:hover { color: var(--accent); }
         .nav a.active {
-            background: var(--accent);
-            color: #fff;
+            color: var(--text);
+            box-shadow: inset 0 -1px 0 currentColor;
         }
-        [data-theme="dark"] .nav a.active { color: #131418; }
 
         .theme-toggle {
             margin-left: 4px;
@@ -142,7 +136,6 @@
             border: none;
             background: transparent;
             color: var(--text-soft);
-            border-radius: var(--radius-pill);
             cursor: pointer;
             transition: background-color 0.15s ease, color 0.15s ease;
         }
@@ -161,35 +154,21 @@
             padding: 40px 24px 80px;
         }
 
+        /* Page title, set like the homepage name */
         .section-title {
-            font-family: 'Newsreader', Georgia, serif;
-            font-weight: 500;
-            font-size: 30px;
-            line-height: 1.2;
-            margin: 36px 0 6px;
+            font-weight: 400;
+            font-size: 42px;
+            line-height: 1.1;
+            margin: 36px 0 28px;
             color: var(--text);
-            letter-spacing: -0.01em;
-        }
-        .section-rule {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-            color: var(--text-muted);
-            font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-        .section-rule::after {
-            content: "";
-            flex: 1;
-            height: 1px;
-            background: var(--border);
         }
 
+        /* The small "Posts" label is not used in the paper layout */
+        .section-rule { display: none; }
+
         /* =========================================================
-           Post list
+           Post list — hairline-separated entries, date in the left margin,
+           tags as a "Keywords:" line under the description
            ========================================================= */
         .post-list {
             list-style: none;
@@ -197,100 +176,78 @@
             padding: 0;
             display: flex;
             flex-direction: column;
-            gap: 16px;
         }
 
         .post {
-            display: block;
-            padding: 22px 24px;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow-sm);
-            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 18px 0 18px 120px;
+            border-top: 1px solid var(--border);
         }
-        .post:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lift);
-            border-color: color-mix(in srgb, var(--accent) 25%, var(--border));
-        }
+        .post:first-child { padding-top: 0; border-top: 0; }
 
         .post-meta {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 8px;
-            font-size: 13px;
-            color: var(--text-muted);
+            order: 4;
+            margin-top: 8px;
+            font-size: 15.5px;
+            color: var(--text-soft);
         }
         .post-date {
-            font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-            letter-spacing: 0.02em;
+            position: absolute;
+            left: 0;
+            top: 18px;
+            font-size: 16px;
+            line-height: 27px;
+            color: var(--text-muted);
         }
-        .post-tag {
-            display: inline-flex;
-            align-items: center;
-            padding: 2px 10px;
-            font-size: 12px;
-            font-weight: 500;
-            color: var(--highlight);
-            background: var(--highlight-bg);
-            border-radius: var(--radius-pill);
-        }
+        .post:first-child .post-date { top: 0; }
+        .post-date + .post-tag::before { content: "Keywords: "; font-weight: 700; color: var(--text); }
+        .post-tag + .post-tag::before { content: ", "; }
 
         .post-title {
-            font-family: 'Newsreader', Georgia, serif;
-            font-weight: 500;
-            font-size: 22px;
-            line-height: 1.3;
-            margin: 0 0 4px;
+            font-weight: 400;
+            font-size: 20px;
+            line-height: 1.35;
+            margin: 0 0 2px;
             color: var(--text);
+            text-wrap: pretty;
         }
         .post-title a { color: var(--text); border-bottom: none; }
-        .post-title a:hover { color: var(--highlight); }
+        .post-title a:hover { color: var(--accent-hover); }
 
         .post-subtitle {
-            margin: 0 0 10px;
-            font-size: 15px;
+            margin: 0 0 8px;
+            font-size: 17px;
             font-style: italic;
             color: var(--text-soft);
-            font-family: 'Newsreader', Georgia, serif;
         }
 
         .post-desc {
-            margin: 0 0 12px;
-            font-size: 14.5px;
-            line-height: 1.7;
-            color: var(--text-soft);
+            margin: 0;
+            font-size: 16.5px;
+            line-height: 1.5;
+            text-wrap: pretty;
         }
 
+        /* Links as [arXiv] [Code] */
         .post-links {
+            order: 5;
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 4px 14px;
+            margin-top: 6px;
         }
         .chip {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            padding: 3px 10px;
-            font-size: 12.5px;
-            font-weight: 500;
+            font-size: 15px;
             color: var(--accent);
-            background: var(--bg-subtle);
-            border: 1px solid var(--border-soft);
-            border-radius: var(--radius-pill);
-            transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease;
+            border: 0;
         }
-        .chip:hover {
-            color: var(--highlight);
-            background: var(--highlight-bg);
-            border-color: var(--highlight);
-            border-bottom-color: var(--highlight);
-        }
-        .chip svg { width: 12px; height: 12px; flex-shrink: 0; opacity: 0.85; }
-        .chip:hover svg { opacity: 1; }
+        .chip::before { content: "["; color: var(--text-muted); }
+        .chip::after { content: "]"; color: var(--text-muted); }
+        .chip svg { display: none; }
 
         /* =========================================================
            Footer
@@ -303,11 +260,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 12.5px;
+            font-size: 14px;
             color: var(--text-muted);
         }
         footer a { color: var(--text-muted); border-bottom: none; }
-        footer a:hover { color: var(--highlight); }
+        footer a:hover { color: var(--accent-hover); }
 
         /* =========================================================
            Animations
@@ -325,20 +282,22 @@
         }
 
         /* =========================================================
-           Responsive
+           Responsive — on phones the date and keywords move above the title
            ========================================================= */
         @media (max-width: 720px) {
+            body { font-size: 17px; }
             .nav-inner { gap: 0; padding: 4px; }
-            .nav a { padding: 6px 10px; font-size: 13px; }
             main { padding: 24px 18px 60px; }
-            .section-title { font-size: 26px; }
-            .post { padding: 18px 20px; }
-            .post-title { font-size: 20px; }
+            .section-title { font-size: 32px; margin-top: 24px; }
+            .post { padding-left: 0; }
+            .post-meta { order: -1; margin: 0 0 4px; font-size: 15px; color: var(--text-muted); }
+            .post-date { position: static; font-size: inherit; line-height: inherit; color: inherit; }
+            .post-date + .post-tag::before { content: " · "; font-weight: 400; color: inherit; }
         }
 
         @media (max-width: 440px) {
             .nav { padding: 0 12px; }
-            .nav a { padding: 6px 8px; font-size: 12.5px; }
+            .nav a { padding: 5px 8px; font-size: 15px; }
         }
     </style>
 </head>
@@ -420,15 +379,12 @@
     <script>
         /* =====================================================
            Theme toggle (shares the 'theme' key with the homepage,
-           so the choice persists across pages)
+           so the choice persists across pages; the initial theme
+           is set in <head>)
            ===================================================== */
         (function() {
             const storageKey = 'theme';
             const root = document.documentElement;
-            const stored = localStorage.getItem(storageKey);
-            const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const initial = stored || (systemDark ? 'dark' : 'light');
-            root.setAttribute('data-theme', initial);
 
             const toggle = document.getElementById('theme-toggle');
             toggle.addEventListener('click', () => {

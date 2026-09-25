@@ -2,8 +2,7 @@
 
 .widget-root {
   position: relative;
-  border-radius: 0 8px 8px 0;
-  background: #ffffff;
+  background: transparent;
   border-left: 3px solid #1d3557;
   padding: 18px clamp(14px, 2.4vw, 22px) 16px;
   margin: 14px auto 22px;
@@ -23,7 +22,6 @@
   background: #fef2f2;
   color: #991b1b;
   padding: 16px 20px;
-  border-radius: 10px;
   font-size: 14px;
 }
 .widget-error code {
@@ -41,8 +39,8 @@
   margin-bottom: 4px;
 }
 .widget-headline {
-  font-family: "Newsreader", "Source Serif Pro", Georgia, serif;
-  font-size: 18px;
+  font-family: inherit;
+  font-size: 19px;
   font-weight: 500;
   color: #1a1d24;
   letter-spacing: -0.005em;
@@ -146,12 +144,12 @@
 .widget-charts text.axis-label {
   font-size: 11px;
   fill: #475569;
-  font-family: "Helvetica Neue", "Helvetica", "Arial", "Inter", sans-serif;
+  font-family: var(--serif);
 }
 .widget-charts text.axis-title {
   font-size: 12px;
   fill: #334155;
-  font-family: "Helvetica Neue", "Helvetica", "Arial", "Inter", sans-serif;
+  font-family: var(--serif);
 }
 .widget-charts text.band-label,
 .widget-charts text.ratio-title {
@@ -303,7 +301,7 @@
 .rank-note {
   font-size: 12.5px;
   color: #142647;
-  font-family: "Helvetica Neue", "Helvetica", "Arial", "Inter", sans-serif;
+  font-family: var(--serif);
   font-style: italic;
 }
 
@@ -354,8 +352,7 @@
 }
 
 @media (max-width: 700px) {
-  .widget-root { padding: 16px 14px 14px; border-radius: 10px; }
-  .widget-headline { font-size: 16px; }
+  .widget-root { padding: 16px 14px 14px; }
   .spectrum-chart { height: 200px; }
   .ratio-chart    { height: 110px; }
   .alignment-chart { height: 240px; }
